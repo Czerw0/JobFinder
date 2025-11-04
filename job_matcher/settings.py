@@ -42,6 +42,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # My Apps
+    'jobfinder.apps.JobfinderConfig',
+    'users.apps.UsersConfig',  
 ]
 
 MIDDLEWARE = [
