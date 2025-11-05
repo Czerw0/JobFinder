@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+    <h2>Manage Your CV</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <fieldset>
+            <legend>CV Details</legend>
+            {{ form.as_p }}
+        </fieldset>
+        <div>
+            <button type="submit">Save CV</button>
+        </div>
+    </form>
+{% endblock content %}

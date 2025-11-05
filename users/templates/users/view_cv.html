@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+    <h2>Your CV</h2>
+
+    {% if cv %}
+        <p><strong>Full Name:</strong> {{ cv.full_name }}</p>
+        <p><strong>Email:</strong> {{ cv.email }}</p>
+        <p><strong>Phone:</strong> {{ cv.phone_number }}</p>
+        <p><strong>LinkedIn:</strong> <a href="{{ cv.linkedin_profile }}">{{ cv.linkedin_profile }}</a></p>
+        <hr>
+        <h3>Skills</h3>
+        <p>{{ cv.skills }}</p>
+        <hr>
+        <h3>Experience</h3>
+        <p>{{ cv.experience|linebreaks }}</p> {# The linebreaks filter respects new lines #}
+        <hr>
+        <h3>Education</h3>
+        <p>{{ cv.education|linebreaks }}</p>
+
+        <a href="{% url 'users:manage_cv' %}">Edit Your CV</a>
+    {% else %}
+        <p>You have not created a CV yet.</p>
+        <a href="{% url 'users:manage_cv' %}">Create Your CV Now</a>
+    {% endif %}
+
+{% endblock content %}
