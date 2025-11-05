@@ -19,6 +19,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # Any URL starting with '' will be handled by the users.urls file
-    path('', include('users.urls')),
+    path('accounts/', include('users.urls')), # URLs for login, register, etc.
+    path('', include('jobfinder.urls')),     # URL for the homepage
 ]
