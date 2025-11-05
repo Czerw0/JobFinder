@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <title>Job Finder</title>
+    </head>
+    <body>
+        <header>
+            <h1><a href="/">Job Finder</a></h1>
+            <div>
+                {% if user.is_authenticated %}
+                    <a href="#">My CV</a>
+                    <form style="display: inline;" method="POST" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit">Logout</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}">Login</a>
+                    <a href="{% url 'register' %}">Register</a>
+                {% endif %}
+            </div>
+            <hr>
+        </header>
+
+        <main>
+            {% block content %}{% endblock %}
+        </main>
+    </body>
+    </html>
+ 

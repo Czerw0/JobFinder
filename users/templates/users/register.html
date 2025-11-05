@@ -1,0 +1,27 @@
+<!-- In users/templates/users/register.html -->
+{% extends "base.html" %}
+{% block content %}
+    <h2>Join Today</h2>
+
+<!-- This block will display any general form errors -->
+{% if form.errors %}
+    <div style="color: red;">
+        <p>Please correct the errors below:</p>
+        {{ form.non_field_errors }}
+    </div>
+{% endif %}
+
+<form method="POST">
+    {% csrf_token %} <!-- Important for security -->
+    <fieldset>
+        <legend>Sign Up</legend>
+        {{ form.as_p }} <!-- Renders fields with their errors next to them -->
+    </fieldset>
+    <div>
+        <button type="submit">Sign Up</button>
+    </div>
+</form>
+<small>
+    Already Have An Account? <a href="{% url 'login' %}">Sign In</a>
+</small>
+{% endblock content %}
