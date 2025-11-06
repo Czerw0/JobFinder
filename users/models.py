@@ -21,6 +21,7 @@ class CV(models.Model):
     github_profile = models.URLField(blank=True)
     linkedin_profile = models.URLField(blank=True)
     skills = models.TextField(help_text="Enter skills separated by commas")
+    experience_years= models.IntegerField(help_text="Number of years of experience in field", default=None, null=True, blank=True)
     experience = models.TextField(help_text="Describe your work experience.")
     education = models.TextField(help_text="Describe your education.")
     languages = models.TextField(help_text="List languages you know, separated by commas.")
