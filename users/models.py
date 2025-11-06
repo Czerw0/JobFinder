@@ -14,6 +14,7 @@ class Profile(models.Model):
 
 # This is the model for the CV form data.
 class CV(models.Model):
+    id = models.AutoField(primary_key=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=200)
     email = models.EmailField()

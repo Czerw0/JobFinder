@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+    <h2>All Scraped Jobs ({{ jobs.count }})</h2>
+    <hr>
+    <div style="display: flex; flex-direction: column; gap: 1rem;">
+        {% for job in jobs %}
+            <div style="border: 1px solid grey; padding: 1rem; border-radius: 8px;">
+                <h3><a href="{{ job.job_url }}" target="_blank">{{ job.title }}</a></h3>
+                <p><strong>Company:</strong> {{ job.company }}</p>
+                <p><strong>Location:</strong> {{ job.location }}</p>
+                <p><strong>Salary:</strong> {{ job.salary }}</p>
+            </div>
+        {% empty %}
+            <p>No jobs have been scraped yet. Run the scrape_remoteok command!</p>
+        {% endfor %}
+    </div>
+{% endblock content %}
