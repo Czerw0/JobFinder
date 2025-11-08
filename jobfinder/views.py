@@ -2,7 +2,9 @@ from django.shortcuts import render
 from .models import Job
 from django.core.management import call_command
 import threading
-
+import time
+from django.utils import timezone
+from datetime import timedelta
 
 def home(request):
     return render(request, 'jobfinder/home.html')
@@ -19,8 +21,11 @@ def job_list(request):
 
     def archive_stale_jobs():
         print("Archiving stale jobs...")
+
         try:
-            stale_jobs = Job.objects.filter(status=Job.STATUS_ACTIVE)
+            archive_threshold = timezone.now() - timedelta(days=60)
+
+            stale_jobs = Job.objects.filter(status=Job.STATUS_ACTIVE, date_last_seen__lt=archive_threshold)
             for job in stale_jobs:
                 if job.is_potentially_stale:
                     job.status = Job.STATUS_ARCHIVED
