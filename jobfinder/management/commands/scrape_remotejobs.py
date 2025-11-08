@@ -118,6 +118,7 @@ class Command(BaseCommand):
                     "salary": self._format_salary(offer),
                     "description": description_text,
                     "date_posted": date_posted_obj, 
+                    "status": Job.STATUS_ACTIVE, # IMPORTANT: Always set status to active when seen
                 }
 
                 _, created = Job.objects.update_or_create(

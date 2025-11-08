@@ -17,9 +17,30 @@ def job_list(request):
         except Exception as e:
             print(f"An error occurred while refreshing the api: {e}")
 
+    def archive_stale_jobs():
+        print("Archiving stale jobs...")
+        try:
+            stale_jobs = Job.objects.filter(status=Job.STATUS_ACTIVE)
+            for job in stale_jobs:
+                if job.is_potentially_stale:
+                    job.status = Job.STATUS_ARCHIVED
+                    job.save()
+                    print(f"Archived job: {job.title} at {job.company}")
+            print("Archiving process finished.")
+        except Exception as e:
+            print(f"An error occurred while archiving stale jobs: {e}")
+
 
     scraper_thread = threading.Thread(target=refresh_api)
     scraper_thread.start()
-    jobs = Job.objects.all().order_by('-date_scraped')
-    return render(request, 'jobfinder/job_list.html', {'jobs': jobs})
+    archiver_thread = threading.Thread(target=archive_stale_jobs)
+    archiver_thread.start()
+    archiver_thread.join()  # Wait for the archiver thread to finish
+    archived_jobs_count = Job.objects.filter(status=Job.STATUS_ARCHIVED).count()
+    print(f"Archived {archived_jobs_count} jobs")
+    jobs = Job.objects.filter(status=Job.STATUS_ACTIVE).order_by('-date_last_seen')
+    context = {
+        'jobs': jobs
+    }
+    return render(request, 'jobfinder/job_list.html', context)
 

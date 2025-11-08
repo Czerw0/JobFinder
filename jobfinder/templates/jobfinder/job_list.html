@@ -5,13 +5,18 @@
     <div style="display: flex; flex-direction: column; gap: 1rem;">
         {% for job in jobs %}
             {% if job.company and job.job_url %}
-                <div style="border: 1px solid grey; padding: 1rem; border-radius: 8px;"></div>
-                    <h3><a href="{{ job.job_url }}" target="_blank">{{ job.title }}</a></h3><strong>Posted: </strong>{{job.date_posted|date:"m-d"}}<br>
-                    <p><strong>Company:</strong> {{ job.company }}</p>
-                    <p><strong>Location:</strong> {{ job.location }}</p>
-                    <p><strong>Tags:</strong> {{ job.attributes }}</p>
-                    <p><strong>Salary:</strong> {{ job.salary }}</p>
-                </div>
+                {% if job.is_potentially_stale %}
+                    <div class="alert alert-warning">
+                        <strong>Note:</strong> This job offer was last confirmed over 20 days ago and may no longer be active.
+                    </div>
+                {% endif %}     
+                    <div style="border: 1px solid grey; padding: 1rem; border-radius: 8px;"></div>
+                        <h3><a href="{{ job.job_url }}" target="_blank">{{ job.title }}</a></h3><strong>Posted: </strong>{{job.date_posted|date:"Y-m-d"}}<br>
+                        <p><strong>Company:</strong> {{ job.company }}</p>
+                        <p><strong>Location:</strong> {{ job.location }}</p>
+                        <p><strong>Tags:</strong> {{ job.attributes }}</p>
+                        <p><strong>Salary:</strong> {{ job.salary }}</p>
+                    </div>
             {% endif %}
         {% empty %}
             <p>No jobs have been scraped yet. Run the scrape_remoteok command!</p>
