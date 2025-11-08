@@ -6,6 +6,7 @@ class Job(models.Model):
     company = models.CharField(max_length=255)
     location = models.CharField(max_length=255, null=True, blank=True)
     salary = models.CharField(max_length=100, null=True, blank=True)
+    details = models.TextField(null=True, blank=True)
     job_url = models.URLField(unique=True) # unique=True prevents duplicate jobs
 
     description = models.TextField(null=True, blank=True)
