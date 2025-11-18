@@ -18,7 +18,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Initialize django-environ
 env = environ.Env()
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+env_file_path = os.path.join(BASE_DIR, '.env')
+environ.Env.read_env(env_file_path)
+
 
 
 # Quick-start development settings - unsuitable for production

@@ -1,5 +1,3 @@
-# jobfinder/management/commands/archive_old_jobs.py
-
 import logging
 from datetime import timedelta
 from django.utils import timezone
@@ -23,7 +21,7 @@ class Command(BaseCommand):
         # Find active jobs last seen more than 90 days ago.
         jobs_to_archive = Job.objects.filter(
             status=Job.STATUS_ACTIVE,
-            date_last_seen__lt=archive_threshold
+            date_posted__lt=archive_threshold
         )
         
         count = jobs_to_archive.count()

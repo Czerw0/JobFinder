@@ -2,12 +2,12 @@ from django.shortcuts import render
 from .models import Job
 from django.core.management import call_command
 import threading
-import time
 from django.utils import timezone
 from datetime import timedelta
 
 def home(request):
     return render(request, 'jobfinder/home.html')
+
 
 def job_list(request):
 
@@ -25,12 +25,18 @@ def job_list(request):
         try:
             archive_threshold = timezone.now() - timedelta(days=60)
 
-            stale_jobs = Job.objects.filter(status=Job.STATUS_ACTIVE, date_last_seen__lt=archive_threshold)
+            # FIX #1 — use __lt instead of _lt
+            stale_jobs = Job.objects.filter(
+                status=Job.STATUS_ACTIVE,
+                date_posted__lt=archive_threshold      # FIXED
+            )
+
+            # FIX #2 — remove is_potentially_stale check
             for job in stale_jobs:
-                if job.is_potentially_stale:
-                    job.status = Job.STATUS_ARCHIVED
-                    job.save()
-                    print(f"Archived job: {job.title} at {job.company}")
+                job.status = Job.STATUS_ARCHIVED
+                job.save()
+                print(f"Archived job: {job.title} at {job.company}")
+
             print("Archiving process finished.")
         except Exception as e:
             print(f"An error occurred while archiving stale jobs: {e}")
@@ -38,14 +44,15 @@ def job_list(request):
 
     scraper_thread = threading.Thread(target=refresh_api)
     scraper_thread.start()
+
     archiver_thread = threading.Thread(target=archive_stale_jobs)
     archiver_thread.start()
-    archiver_thread.join()  # Wait for the archiver thread to finish
+    archiver_thread.join()
+
     archived_jobs_count = Job.objects.filter(status=Job.STATUS_ARCHIVED).count()
     print(f"Archived {archived_jobs_count} jobs")
-    jobs = Job.objects.filter(status=Job.STATUS_ACTIVE).order_by('-date_last_seen')
-    context = {
-        'jobs': jobs
-    }
-    return render(request, 'jobfinder/job_list.html', context)
 
+    jobs = Job.objects.filter(status=Job.STATUS_ACTIVE).order_by('-date_last_seen')
+
+    context = {'jobs': jobs}
+    return render(request, 'jobfinder/job_list.html', context)
