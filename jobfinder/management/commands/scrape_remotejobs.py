@@ -6,14 +6,34 @@ from django.db import transaction
 from jobfinder.models import Job
 from datetime import datetime
 
-logger = logging.getLogger(__name__)
-
+logger = logging.getLogger("scraper")
 
 class Command(BaseCommand):
     help = "Scrapes job offers from RemoteOK and saves them to the database."
 
     API_URL = "https://remoteok.com/api"
     USER_AGENT = "JobFinderApp/1.0 (kczerwinski3@st.swps.edu.pl)"
+
+    def handle(self, *args, **options):
+        logger.info("Starting job scrape...")
+
+        try:
+            jobs = self._fetch_jobs()
+            if not jobs:
+                self.stdout.write(self.style.WARNING("No job data returned."))
+                return
+
+            new_count, update_count = self._save_jobs(jobs)
+
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Done. Added {new_count} new jobs, updated {update_count}."
+                )
+            )
+
+        except Exception as e:
+            logger.error(f"Error: {e}", exc_info=True)
+            self.stderr.write(self.style.ERROR(str(e)))
 
     # ------------------ FETCH ------------------ #
 
@@ -86,5 +106,7 @@ class Command(BaseCommand):
 
                 new_jobs += int(created)
                 updated_jobs += int(not created)
+
+        logger.info("Scraper run completed: %s new, %s updated", new_jobs, updated_jobs)
 
         return new_jobs, updated_jobs

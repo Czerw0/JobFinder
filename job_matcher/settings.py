@@ -47,6 +47,15 @@ INSTALLED_APPS = [
     # My Apps
     'jobfinder.apps.JobfinderConfig',
     'users.apps.UsersConfig',  
+    # refresh apps
+    'django_crontab',
+]
+
+CRONJOBS = [
+    # Run scraper every 10 minutes
+    ('*/10 * * * *', 'django.core.management.call_command', ['scrape_remotejobs']),
+    # Archive old jobs every 10 minutes
+    ('*/10 * * * *', 'django.core.management.call_command', ['archive_old_jobs']),
 ]
 
 MIDDLEWARE = [
@@ -131,3 +140,52 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = 'jobfinder:home' # Redirect to the homepage after login
 LOGIN_URL = 'users:login' # The name of the login URL pattern
 LOGOUT_REDIRECT_URL = 'jobfinder:home' # Go to homepage after logout
+
+
+# LOGGING CONFIGURATION
+LOG_DIR = os.path.join(BASE_DIR, "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "standard": {
+            "format": "[%(asctime)s] %(levelname)s %(name)s: %(message)s"
+        },
+    },
+    "handlers": {
+        "scraper_file": {
+            "level": "INFO",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(LOG_DIR, "scraper.log"),
+            "maxBytes": 5*1024*1024,   # 5 MB
+            "backupCount": 3,
+            "formatter": "standard",
+        },
+        "archive_file": {
+            "level": "INFO",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(LOG_DIR, "archive.log"),
+            "maxBytes": 5*1024*1024,   # 5 MB
+            "backupCount": 3,
+            "formatter": "standard",
+        },
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
+        }
+    },
+    "loggers": {
+        "scraper": {
+            "handlers": ["scraper_file", "console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "archiver": {
+            "handlers": ["archive_file", "console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}

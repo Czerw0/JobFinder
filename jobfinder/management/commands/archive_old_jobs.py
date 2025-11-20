@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.core.management.base import BaseCommand
 from jobfinder.models import Job
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("archiver")
 
 class Command(BaseCommand):
     """
