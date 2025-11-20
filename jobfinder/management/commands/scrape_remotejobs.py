@@ -1,12 +1,13 @@
-import logging
 import requests
 from bs4 import BeautifulSoup
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from jobfinder.models import Job
 from datetime import datetime
+from jobfinder.logging_config import setup_logger
 
-logger = logging.getLogger("scraper")
+logger = setup_logger("scraper", "scraper.log")
+
 
 class Command(BaseCommand):
     help = "Scrapes job offers from RemoteOK and saves them to the database."

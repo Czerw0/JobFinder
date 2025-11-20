@@ -51,11 +51,6 @@ INSTALLED_APPS = [
     'django_crontab',
 ]
 
-CRONJOBS = [
-    # Run scraper every 10 minutes
-    ('*/2 * * * *', '/JobFinder/JobFinder/run_jobs.sh'),
-]
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

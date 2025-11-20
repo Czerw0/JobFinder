@@ -1,10 +1,11 @@
-import logging
+
 from datetime import timedelta
 from django.utils import timezone
 from django.core.management.base import BaseCommand
 from jobfinder.models import Job
+from jobfinder.logging_config import setup_logger
+logger = setup_logger("archiver", "archive.log")
 
-logger = logging.getLogger("archiver")
 
 class Command(BaseCommand):
     """
@@ -16,7 +17,7 @@ class Command(BaseCommand):
         # Define the threshold for archiving. 90 days is a reasonable default.
         archive_threshold = timezone.now() - timedelta(days=90)
 
-        self.stdout.write("Searching for very old jobs to archive...")
+        self.stdout.write("Searching for old jobs to archive...")
         
         # Find active jobs last seen more than 90 days ago.
         jobs_to_archive = Job.objects.filter(
