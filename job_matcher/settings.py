@@ -53,10 +53,9 @@ INSTALLED_APPS = [
 
 CRONJOBS = [
     # Run scraper every 10 minutes
-    ('*/10 * * * *', 'django.core.management.call_command', ['scrape_remotejobs']),
-    # Archive old jobs every 10 minutes
-    ('*/10 * * * *', 'django.core.management.call_command', ['archive_old_jobs']),
+    ('*/2 * * * *', '/JobFinder/JobFinder/run_jobs.sh'),
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
