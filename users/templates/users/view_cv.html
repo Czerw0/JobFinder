@@ -6,16 +6,45 @@
         <p><strong>Full Name:</strong> {{ cv.full_name }}</p>
         <p><strong>Email:</strong> {{ cv.email }}</p>
         <p><strong>Phone:</strong> {{ cv.phone_number }}</p>
-        <p><strong>LinkedIn:</strong> <a href="{{ cv.linkedin_profile }}">{{ cv.linkedin_profile }}</a></p>
+
+        <p><strong>GitHub:</strong>
+            {% if cv.github_profile %}
+                <a href="{{ cv.github_profile }}">{{ cv.github_profile }}</a>
+            {% else %}
+                Not provided
+            {% endif %}
+        </p>
+
+        <p><strong>LinkedIn:</strong>
+            {% if cv.linkedin_profile %}
+                <a href="{{ cv.linkedin_profile }}">{{ cv.linkedin_profile }}</a>
+            {% else %}
+                Not provided
+            {% endif %}
+        </p>
+
         <hr>
         <h3>Skills</h3>
-        <p>{{ cv.skills }}</p>
+        <p>{{ cv.skills|linebreaks }}</p>
+
         <hr>
         <h3>Experience</h3>
-        <p>{{ cv.experience|linebreaks }}</p> {# The linebreaks filter respects new lines #}
+        <p><strong>Years:</strong>
+            {% if cv.experience_years is not None %}
+                {{ cv.experience_years }}
+            {% else %}
+                Not provided
+            {% endif %}
+        </p>
+        <p>{{ cv.experience|linebreaks }}</p>
+
         <hr>
         <h3>Education</h3>
         <p>{{ cv.education|linebreaks }}</p>
+
+        <hr>
+        <h3>Languages</h3>
+        <p>{{ cv.languages|linebreaks }}</p>
 
         <a href="{% url 'users:manage_cv' %}">Edit Your CV</a>
     {% else %}

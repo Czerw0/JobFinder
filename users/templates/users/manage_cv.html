@@ -1,14 +1,46 @@
 {% extends "base.html" %}
 {% block content %}
     <h2>Manage Your CV</h2>
-    <form method="POST">
+    <form method="POST" class="cv-form">
         {% csrf_token %}
         <fieldset>
             <legend>CV Details</legend>
-            {{ form.as_p }}
+            
+            <div class="form-section">
+                <h3>Contact Information</h3>
+                {{ form.full_name }}
+                {{ form.email }}
+                {{ form.phone_number }}
+            </div>
+
+            <div class="form-section">
+                <h3>Online Profiles</h3>
+                {{ form.github_profile }}
+                {{ form.linkedin_profile }}
+            </div>
+
+            <div class="form-section">
+                <h3>Professional Information</h3>
+                {{ form.experience_years }}
+                {{ form.skills }}
+                {{ form.experience }}
+            </div>
+
+            <div class="form-section">
+                <h3>Education & Languages</h3>
+                {{ form.education }}
+                {{ form.languages }}
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="error-messages">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
         </fieldset>
-        <div>
-            <button type="submit">Save CV</button>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">Save CV</button>
         </div>
     </form>
 {% endblock content %}

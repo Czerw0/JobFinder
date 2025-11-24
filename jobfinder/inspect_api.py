@@ -1,12 +1,14 @@
-'''This scripts i only for testing of api response structure
-    It fetches data from the RemoteOK API and prints the structured JSON response.'''
+'''
+Quick script to check the structure of the RemoteOK API response.
+It fetches the API data and prints a readable, formatted JSON so you can inspect keys and content.
+'''
 
 import requests
 import json
 import sys
 
 
-# The URL of the API endpoint 
+# RemoteOK API endpoint
 API_URL = "https://remoteok.com/api"
 
 
@@ -16,46 +18,47 @@ HEADERS = {
 
 def inspect_remoteok_api():
     """
-    Fetches data from the RemoteOK API and prints the structured JSON response.
+    Call the RemoteOK API, validate the response, and print a human-friendly analysis
+    plus the full pretty-printed JSON.
     """
-    print(f"--- Contacting API endpoint: {API_URL} ---")
+    print(f"Contacting API endpoint: {API_URL}")
 
     try:
-        # Make the GET request with a timeout to prevent it from hanging indefinitely.
+        # Perform a GET request with a timeout so it doesn't hang forever.
         response = requests.get(API_URL, headers=HEADERS, timeout=20)
 
-        # Raise an error for bad HTTP status codes (4xx or 5xx).
+        # If the server responded with an error status, raise an exception.
         response.raise_for_status()
 
     except requests.exceptions.HTTPError as e:
         print(f"\nHTTP Error: The server returned a status code {e.response.status_code}")
         print(f"   Reason: {e.response.reason}")
         print(f"   Response Text: {e.response.text}")
-        sys.exit(1) # Exit with an error code
+        sys.exit(1)  # Exit with a non-zero code to indicate failure
     except requests.exceptions.RequestException as e:
-        # This catches network-related errors like timeouts, DNS errors, etc.
+        # Catches network-related problems like timeouts or DNS failures.
         print(f"\nNetwork Error: Could not connect to the API.")
         print(f"   Error Details: {e}")
         sys.exit(1)
 
-    print(f"✅ Success! Received a response (Status Code: {response.status_code}).")
-    print("--- Parsing JSON data... ---")
+    print(f"Success! Received a response (Status Code: {response.status_code}).")
+    print("Parsing JSON data...")
 
     try:
-        # Try to parse the response text as JSON.
+        # Parse response body as JSON.
         data = response.json()
     except json.JSONDecodeError:
         print("\nJSON Error: The response from the API was not valid JSON.")
-        print("--- Raw Response Text (first 500 characters) ---")
+        print("Raw Response Text (first 500 characters)")
         print(response.text[:500])
         sys.exit(1)
 
-    #response is ok, print some analysis
-    print("\n--- API Response Analysis ---")
+    # Response parsed successfully — provide some quick analysis.
+    print("\nAPI Response Analysis")
     if isinstance(data, list):
         print(f"The root of the JSON is a LIST containing {len(data)} items.")
         if data:
-            # 2nd item is usually the first job offer (1st is legal notice)
+            # On RemoteOK, the first element is usually a notice; the second is the first job.
             item_to_inspect = data[1] if len(data) > 1 else data[0]
             print("\nKeys found in the second item (a sample job offer):")
             for key in item_to_inspect.keys():
@@ -68,9 +71,8 @@ def inspect_remoteok_api():
     else:
         print("The JSON is a single value (e.g., string, number).")
 
-    # --- Full Pretty-Printed JSON Output ---
-    print("\n--- Full JSON Response (Formatted) ---")
-    # Use json.dumps to pretty-print the data with an indent of 2 spaces.
+    # Inspecting the content
+    print("\nFull JSON Response (Formatted)")
     pretty_json = json.dumps(data, indent=2)
     print(pretty_json)
 

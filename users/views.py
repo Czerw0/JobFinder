@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages 
 from .forms import UserRegistrationForm
 from django.contrib.auth.decorators import login_required
-from .forms import UserRegistrationForm, CVForm
+from .forms import UserRegistrationForm, CVForm 
 from .models import CV
 
 
@@ -22,7 +22,7 @@ def register(request):
         form = UserRegistrationForm()
     return render(request, 'users/register.html', {'form': form})
 
-@login_required
+@login_required # Ensure the user is logged in to view their CV
 def view_cv(request):
     try:
         cv = request.user.cv
@@ -30,7 +30,7 @@ def view_cv(request):
         cv = None
     return render(request, 'users/view_cv.html', {'cv': cv})
 
-@login_required
+@login_required 
 def manage_cv(request):
     try:
         cv_instance = request.user.cv

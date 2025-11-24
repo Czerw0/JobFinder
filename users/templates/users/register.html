@@ -1,9 +1,9 @@
-<!-- In users/templates/users/register.html -->
+
 {% extends "base.html" %}
 {% block content %}
     <h2>Join Today</h2>
 
-<!-- This block will display any general form errors -->
+
 {% if form.errors %}
     <div style="color: red;">
         <p>Please correct the errors below:</p>
@@ -12,10 +12,10 @@
 {% endif %}
 
 <form method="POST">
-    {% csrf_token %} <!-- Important for security -->
+    {% csrf_token %} 
     <fieldset>
         <legend>Sign Up</legend>
-        {{ form.as_p }} <!-- Renders fields with their errors next to them -->
+        {{ form.as_p }} 
     </fieldset>
     <div>
         <button type="submit">Sign Up</button>

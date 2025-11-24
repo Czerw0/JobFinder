@@ -5,6 +5,11 @@ import threading
 from django.utils import timezone
 from datetime import timedelta
 from jobfinder.logging_config import setup_logger
+from django.http import JsonResponse
+from .match_jobs import match_jobs_to_cv
+from django.views.decorators.http import require_GET
+from users.models import CV
+from django.shortcuts import render, get_object_or_404
 
 # Setup loggers
 scraper_logger = setup_logger("scraper", "scraper.log")
@@ -59,3 +64,47 @@ def job_list(request):
 
     context = {'jobs': jobs}
     return render(request, 'jobfinder/job_list.html', context)
+
+
+@require_GET
+def match_jobs(request, cv_id):
+    top_n = request.GET.get("top", 5)
+    try:
+        top_n = int(top_n)
+    except ValueError:
+        return JsonResponse({"error": "Parameter 'top' must be an integer."}, status=400)
+
+    matched_jobs = match_jobs_to_cv(cv_id, top_n)
+
+    data = [
+        {
+            "id": job.id,
+            "title": job.title,
+            "company": job.company,
+            "application_link": job.application_link,
+            "similarity": None,  
+        }
+        for job in matched_jobs
+    ]
+
+    return JsonResponse({"cv_id": cv_id, "results": data})
+
+
+def match_jobs_view(request, cv_id):
+    """
+    Renders an HTML page with matched jobs for the given CV.
+    """
+    top_n = request.GET.get("top", 5)
+    try:
+        top_n = int(top_n)
+    except ValueError:
+        top_n = 5
+
+    cv = get_object_or_404(CV, id=cv_id)
+    matched_jobs = match_jobs_to_cv(cv_id, top_n)
+
+    return render(request, "jobfinder/match_results.html", {
+        "cv": cv,
+        "jobs": matched_jobs,
+        "top": top_n
+    })

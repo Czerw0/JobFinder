@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Matched Jobs for {{ cv.full_name }}</h2>
+<p>Showing top {{ top }} matches</p>
+
+<ul class="list-group mt-3">
+    {% for job in jobs %}
+        <li class="list-group-item">
+            <h4>{{ job.title }}</h4>
+            <p><strong>Company:</strong> {{ job.company }}</p>
+            <p>{{ job.description|truncatechars:300 }}</p>
+            {% if job.application_link %}
+                <a href="{{ job.application_link }}" target="_blank">Apply</a>
+            {% endif %}
+        </li>
+    {% empty %}
+        <li class="list-group-item">No matches found.</li>
+    {% endfor %}
+</ul>
+
+{% endblock %}

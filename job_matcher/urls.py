@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('users.urls')), # URLs for login, register, etc.
     path('', include('jobfinder.urls')),     # URL for the homepage
+    path('jobs/', include('jobfinder.urls')), # URL for job listings and related views
 ]

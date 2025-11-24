@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-# This is the model for additional user profile information.
+# This is the model for additional user profile information
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     bio = models.TextField(blank=True)
@@ -12,10 +12,10 @@ class Profile(models.Model):
     def __str__(self):
         return f'{self.user.username} Profile'
 
-# This is the model for the CV form data.
+# This is the model for the CV form data
 class CV(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE) # each user has one CV
     full_name = models.CharField(max_length=200)
     email = models.EmailField()
     phone_number = models.CharField(max_length=20, blank=True)

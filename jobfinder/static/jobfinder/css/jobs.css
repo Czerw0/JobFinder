@@ -1,0 +1,76 @@
+/* General page styling */
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Container tweaks */
+.container {
+    max-width: 1200px;
+}
+
+/* Job card */
+.card {
+    border-radius: 12px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+/* Status badges */
+.badge {
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+.badge.bg-success {
+    background-color: #28a745 !important;
+}
+
+.badge.bg-warning {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+.badge.bg-secondary {
+    background-color: #6c757d !important;
+}
+
+/* Job tags */
+.card p strong + .badge {
+    margin-right: 0.3rem;
+    margin-bottom: 0.3rem;
+}
+
+.card p span.badge {
+    display: inline-block;
+    padding: 0.25em 0.5em;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    background-color: #17a2b8;
+    color: #fff;
+    margin-right: 0.3rem;
+    margin-top: 0.2rem;
+}
+
+/* Stale job alert */
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    font-size: 0.8rem;
+    border-radius: 6px;
+}
+
+/* Links */
+.card-title a {
+    text-decoration: none;
+    color: #343a40;
+}
+
+.card-title a:hover {
+    color: #007bff;
+    text-decoration: underline;
+}

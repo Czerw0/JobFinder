@@ -30,7 +30,7 @@ environ.Env.read_env(env_file_path)
 SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool('DEBUG', default=False)
 
 ALLOWED_HOSTS = []
 
@@ -74,6 +74,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'users.context_processors.user_cv',
             ],
         },
     },
@@ -124,7 +125,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -153,7 +154,7 @@ LOGGING = {
             "level": "INFO",
             "class": "logging.handlers.RotatingFileHandler",
             "filename": os.path.join(LOG_DIR, "scraper.log"),
-            "maxBytes": 5*1024*1024,   # 5 MB
+            "maxBytes": 5*1024*1024,
             "backupCount": 3,
             "formatter": "standard",
         },
@@ -161,7 +162,15 @@ LOGGING = {
             "level": "INFO",
             "class": "logging.handlers.RotatingFileHandler",
             "filename": os.path.join(LOG_DIR, "archive.log"),
-            "maxBytes": 5*1024*1024,   # 5 MB
+            "maxBytes": 5*1024*1024,
+            "backupCount": 3,
+            "formatter": "standard",
+        },
+        "matcher_file": {
+            "level": "DEBUG",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(LOG_DIR, "matcher.log"),
+            "maxBytes": 5*1024*1024,
             "backupCount": 3,
             "formatter": "standard",
         },
@@ -179,6 +188,11 @@ LOGGING = {
         "archiver": {
             "handlers": ["archive_file", "console"],
             "level": "INFO",
+            "propagate": False,
+        },
+        "matcher": {
+            "handlers": ["matcher_file", "console"],
+            "level": "DEBUG",
             "propagate": False,
         },
     },
