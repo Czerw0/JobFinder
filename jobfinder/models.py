@@ -37,6 +37,6 @@ class Job(models.Model):
         if not self.date_last_seen:
             return True  # Safety check - treat missing dates as stale
             
-        # Mark as stale if we haven't seen it in the last 20 days
+        # Mark as stale if haven't seen it in the last 20 days
         stale_threshold = timezone.now() - timedelta(days=20)
         return self.date_last_seen < stale_threshold

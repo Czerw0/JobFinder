@@ -1,36 +1,42 @@
-from django import forms # import Django's form library
-from django.contrib.auth.models import User # import the User model
-from django.contrib.auth.forms import UserCreationForm # import the user creation form
+from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 from .models import CV
 
-#Django will handle the password automaticly in UserCreationForm
+
 class UserRegistrationForm(UserCreationForm):
     email = forms.EmailField()
 
     class Meta:
         model = User
-        fields = ['username','email']
+        fields = ['username', 'email']
 
-#Form for CV model
+
 class CVForm(forms.ModelForm):
     class Meta:
         model = CV
         fields = [
-            'full_name', 'email', 'phone_number', 'github_profile',
-            'linkedin_profile', 'skills', 'experience_years',
-            'experience', 'education', 'languages'
+            # contact
+            'full_name', 'email', 'phone_number',
+            'github_profile', 'linkedin_profile',
+
+            # matching-critical fields
+            'skills', 'technologies',
+            'preferred_roles', 'preferred_locations',
+            'job_seniority', 'job_type_preference', 'industry_preference',
+
+            # experience / education
+            'experience_years', 'experience', 'education', 'languages',
         ]
+
         widgets = {
             'skills': forms.Textarea(attrs={'rows': 3}),
+            'technologies': forms.Textarea(attrs={'rows': 2}),
+            'preferred_roles': forms.Textarea(attrs={'rows': 2}),
+            'preferred_locations': forms.Textarea(attrs={'rows': 2}),
+            'industry_preference': forms.TextInput(),
+
             'experience': forms.Textarea(attrs={'rows': 5}),
             'education': forms.Textarea(attrs={'rows': 4}),
             'languages': forms.Textarea(attrs={'rows': 2}),
         }
-
-    def clean_experience_years(self):
-        years = self.cleaned_data.get('experience_years')
-        if years is None:
-            return years
-        if years < 0:
-            raise forms.ValidationError("Experience years cannot be negative.")
-        return years

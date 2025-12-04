@@ -1,55 +1,43 @@
 {% extends "base.html" %}
 {% block content %}
-    <h2>Your CV</h2>
+<h2>Your CV</h2>
 
-    {% if cv %}
-        <p><strong>Full Name:</strong> {{ cv.full_name }}</p>
-        <p><strong>Email:</strong> {{ cv.email }}</p>
-        <p><strong>Phone:</strong> {{ cv.phone_number }}</p>
+{% if cv %}
+    <h3>Contact</h3>
+    <p><strong>Name:</strong> {{ cv.full_name }}</p>
+    <p><strong>Email:</strong> {{ cv.email }}</p>
+    <p><strong>Phone:</strong> {{ cv.phone_number }}</p>
 
-        <p><strong>GitHub:</strong>
-            {% if cv.github_profile %}
-                <a href="{{ cv.github_profile }}">{{ cv.github_profile }}</a>
-            {% else %}
-                Not provided
-            {% endif %}
-        </p>
+    <h3>Online Profiles</h3>
+    <p><strong>GitHub:</strong> {{ cv.github_profile|default:"Not provided" }}</p>
+    <p><strong>LinkedIn:</strong> {{ cv.linkedin_profile|default:"Not provided" }}</p>
 
-        <p><strong>LinkedIn:</strong>
-            {% if cv.linkedin_profile %}
-                <a href="{{ cv.linkedin_profile }}">{{ cv.linkedin_profile }}</a>
-            {% else %}
-                Not provided
-            {% endif %}
-        </p>
+    <h3>Skills</h3>
+    <p>{{ cv.skills|linebreaks }}</p>
 
-        <hr>
-        <h3>Skills</h3>
-        <p>{{ cv.skills|linebreaks }}</p>
+    <h3>Technologies</h3>
+    <p>{{ cv.technologies|linebreaks }}</p>
 
-        <hr>
-        <h3>Experience</h3>
-        <p><strong>Years:</strong>
-            {% if cv.experience_years is not None %}
-                {{ cv.experience_years }}
-            {% else %}
-                Not provided
-            {% endif %}
-        </p>
-        <p>{{ cv.experience|linebreaks }}</p>
+    <h3>Preferences</h3>
+    <p><strong>Roles:</strong> {{ cv.preferred_roles }}</p>
+    <p><strong>Locations:</strong> {{ cv.preferred_locations }}</p>
+    <p><strong>Seniority:</strong> {{ cv.job_seniority }}</p>
+    <p><strong>Job Type:</strong> {{ cv.job_type_preference }}</p>
+    <p><strong>Industry:</strong> {{ cv.industry_preference }}</p>
 
-        <hr>
-        <h3>Education</h3>
-        <p>{{ cv.education|linebreaks }}</p>
+    <h3>Experience</h3>
+    <p><strong>Years:</strong> {{ cv.experience_years }}</p>
+    <p>{{ cv.experience|linebreaks }}</p>
 
-        <hr>
-        <h3>Languages</h3>
-        <p>{{ cv.languages|linebreaks }}</p>
+    <h3>Education</h3>
+    <p>{{ cv.education|linebreaks }}</p>
 
-        <a href="{% url 'users:manage_cv' %}">Edit Your CV</a>
-    {% else %}
-        <p>You have not created a CV yet.</p>
-        <a href="{% url 'users:manage_cv' %}">Create Your CV Now</a>
-    {% endif %}
+    <h3>Languages</h3>
+    <p>{{ cv.languages|linebreaks }}</p>
 
-{% endblock content %}
+    <a href="{% url 'users:manage_cv' %}">Edit Your CV</a>
+{% else %}
+    <p>You have not created a CV yet.</p>
+    <a href="{% url 'users:manage_cv' %}">Create Your CV Now</a>
+{% endif %}
+{% endblock %}
