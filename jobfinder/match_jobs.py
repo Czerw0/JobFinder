@@ -30,98 +30,129 @@ def normalize_text(text: str) -> str:
 # main matching function
 def match_jobs_to_cv(cv_id, top_n=5):
     try:
-        cv = CV.objects.get(id=cv_id) # get the CV by ID
+        cv = CV.objects.get(id=cv_id)
     except CV.DoesNotExist:
         logger.error(f"CV with id {cv_id} does not exist.")
         return []
 
-    # Combine all relevant CV fields into one text 
+    # ---------- helpers ----------
+    def split_set(text):
+        return set(t.strip() for t in normalize_text(text).split() if t.strip())
+
+    def infer_allowed_seniority(years: int):
+        if years is None:
+            return {"junior", "mid"}
+        if years < 2:
+            return {"intern", "junior"}
+        if years < 3:
+            return {"junior"}
+        if years < 5:
+            return {"mid"}
+        return {"senior"}
+
+    SENIORITY_KEYWORDS = {
+        "intern": {"intern", "internship", "trainee"},
+        "junior": {"junior", "jr", "associate", "entry", "graduate"},
+        "mid": {"mid", "intermediate", "regular"},
+        "senior": {"senior", "sr", "lead", "principal", "staff"},
+    }
+
+    def detect_job_seniority(text):
+        found = set()
+        for level, keys in SENIORITY_KEYWORDS.items():
+            for k in keys:
+                if k in text:
+                    found.add(level)
+        return found or {"junior", "mid"}  # fallback
+
+    # ---------- CV text ----------
     cv_text = " ".join([
-        normalize_text(cv.skills or ""),
-        normalize_text(cv.technologies or ""),
-        normalize_text(cv.preferred_roles or ""),
-        normalize_text(cv.preferred_locations or ""),
-        normalize_text(cv.experience or ""),
-        normalize_text(cv.education or ""),
-        normalize_text(cv.languages or ""),
+        normalize_text(cv.skills),
+        normalize_text(cv.technologies),
+        normalize_text(cv.preferred_roles),
+        normalize_text(cv.experience),
+        normalize_text(cv.education),
     ])
 
-    # Fetch active job postings
+    cv_skills = split_set(cv.skills)
+    cv_tech = split_set(cv.technologies)
+    cv_roles = split_set(cv.preferred_roles)
+    cv_locations = split_set(cv.preferred_locations)
+    allowed_seniority = infer_allowed_seniority(cv.experience_years)
+
     jobs = Job.objects.filter(status=Job.STATUS_ACTIVE)
     if not jobs.exists():
-        logger.info("No active jobs found for matching.")
         return []
 
-    job_ids = []
-    job_links = []
-    job_titles = []
-    job_tags = []
-    job_descs = []
+    records = []
 
     for job in jobs:
-        job_ids.append(job.id)
-        job_links.append(job.job_url)
-        job_titles.append(normalize_text(job.title or ""))
+        title = normalize_text(job.title or job.position or "")
+        desc = normalize_text(job.description or "")
+        tags = " ".join(normalize_text(str(t)) for t in job.attributes) if isinstance(job.attributes, list) else ""
+        combined = f"{title} {tags} {desc}"
 
-        # tags from the API → attributes list
-        if isinstance(job.attributes, list):
-            tag_txt = " ".join([normalize_text(str(t)) for t in job.attributes])
-        else:
-            tag_txt = ""
+        job_seniority = detect_job_seniority(combined)
 
-        job_tags.append(tag_txt)
-        job_descs.append(normalize_text(job.description or ""))
+        records.append({
+            "id": job.id,
+            "job": job,
+            "text": combined,
+            "title": title,
+            "seniority": job_seniority,
+            "location": normalize_text(job.location or ""),
+            "salary_min": job.salary,
+            "salary_max": job.salary,
+        })
 
-    # DataFrame
-    jobs_df = pd.DataFrame({
-        "id": job_ids,
-        "link": job_links,
-        "title": job_titles,
-        "tags": job_tags,
-        "desc": job_descs,
-    })
-
-    # combined text for TF-IDF
-    jobs_df["combined_text"] = (
-        jobs_df["title"] + " " +
-        jobs_df["tags"] + " " +
-        jobs_df["desc"]
-    )
-
-    # TF-IDF Vectorization best settings
+    # ---------- TF-IDF ----------
     vectorizer = TfidfVectorizer(
-        stop_words='english',
-        ngram_range=(1, 2),       # unigrams + bigrams
-        min_df=1,                 # keep all terms
-        max_df=0.9,               # ignore extremely common words
+        stop_words="english",
+        ngram_range=(1, 2),
+        max_df=0.9,
+        min_df=1,
     )
 
-    job_vectors = vectorizer.fit_transform(jobs_df["combined_text"])
+    job_vectors = vectorizer.fit_transform(r["text"] for r in records)
     cv_vector = vectorizer.transform([cv_text])
-
-    # Cosine similarity
     similarities = cosine_similarity(cv_vector, job_vectors).flatten()
-    jobs_df["similarity"] = similarities
 
-    # logging
-    for _, row in jobs_df.iterrows():
+    # ---------- scoring ----------
+    scored = []
+
+    for idx, rec in enumerate(records):
+        score = float(similarities[idx]) * 0.70
+
+        text_set = split_set(rec["text"])
+        score += 0.05 * len(cv_skills & text_set)
+        score += 0.05 * len(cv_tech & text_set)
+
+        if any(role in rec["title"] for role in cv_roles):
+            score += 0.10
+
+        if cv.job_type_preference == "remote" and "remote" in rec["location"]:
+            score += 0.10
+        elif any(loc in rec["location"] for loc in cv_locations):
+            score += 0.05
+
+        if not (rec["seniority"] & allowed_seniority):
+            score *= 0.75   # DO NOT nuke score
+
         logger.debug(
-            f"Similarity | Job ID {row['id']} | "
-            f"Title: {row['title']} | "
-            f"Score: {row['similarity']:.4f}"
+            f"Match | Job {rec['id']} | score={score:.4f} | sim={similarities[idx]:.4f} | Job title: '{rec['title']}'"
         )
 
-    # Top-N
-    top_df = jobs_df.nlargest(top_n, "similarity")
-    top_ids = top_df["id"].tolist()
+        job_obj = rec["job"]
+        job_obj.match_score = round(score, 3)
+        try:
+            job_obj.save(update_fields=["match_score"])
+        except Exception:
+            job_obj.save()
 
-    top_jobs = Job.objects.filter(id__in=top_ids)
+        scored.append((job_obj, score))
 
-    # sort by similarity
-    top_jobs = sorted(
-        top_jobs,
-        key=lambda job: float(top_df[top_df["id"] == job.id]["similarity"].values[0]),
-        reverse=True
-    )
+    # sort once after all scores computed
+    scored.sort(key=lambda x: x[1], reverse=True)
 
-    return top_jobs
+    #RETURN ONLY JOB OBJECTS
+    return [job for job, _ in scored[:top_n]]

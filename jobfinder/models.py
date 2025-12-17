@@ -11,7 +11,7 @@ class Job(models.Model):
         (STATUS_ACTIVE, 'Active'),
         (STATUS_ARCHIVED, 'Archived'),
     ]
-
+    
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=255)
     company = models.CharField(max_length=255)
@@ -21,7 +21,8 @@ class Job(models.Model):
     job_url = models.URLField(unique=True)  # Prevent duplicate job postings
     date_posted = models.DateTimeField(null=True, blank=True) 
     description = models.TextField(null=True, blank=True)
-    date_last_seen = models.DateTimeField(auto_now=True)  # Updated whenever we see the job in our feed
+    date_last_seen = models.DateTimeField(auto_now=True)  # Updated whenever see the job in our feed
+    match_score = models.FloatField(null=True, blank=True)  # Store last computed match score
 
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=STATUS_ACTIVE)
 
