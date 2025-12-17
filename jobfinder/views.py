@@ -60,9 +60,7 @@ def job_list(request):
     return render(request, 'jobfinder/job_list.html', {'jobs': jobs})
 
 
-# =========================
 # MATCHING – JSON API
-# =========================
 @require_GET
 def match_jobs(request, cv_id):
     """
@@ -97,9 +95,7 @@ def match_jobs(request, cv_id):
     })
 
 
-# =========================
 # MATCHING – HTML VIEW
-# =========================
 def match_jobs_view(request, cv_id):
     try:
         top_n = int(request.GET.get("top", 5))
