@@ -1,27 +1,28 @@
-
 {% extends "base.html" %}
 {% block content %}
-    <h2>Join Today</h2>
+<div class="container" style="max-width: 500px;">
+    <h2 class="mb-4 text-center">Join Today</h2>
 
+    {% if form.errors %}
+        <div class="alert alert-danger">
+            <p>Please correct the errors below:</p>
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
 
-{% if form.errors %}
-    <div style="color: red;">
-        <p>Please correct the errors below:</p>
-        {{ form.non_field_errors }}
-    </div>
-{% endif %}
+    <form method="POST">
+        {% csrf_token %} 
+        <fieldset class="cv-section">
+            <legend>Sign Up</legend>
+            {{ form.as_p }} 
+        </fieldset>
+        <div class="text-center mt-3">
+            <button type="submit" class="btn btn-primary w-50">Sign Up</button>
+        </div>
+    </form>
 
-<form method="POST">
-    {% csrf_token %} 
-    <fieldset>
-        <legend>Sign Up</legend>
-        {{ form.as_p }} 
-    </fieldset>
-    <div>
-        <button type="submit">Sign Up</button>
-    </div>
-</form>
-<small>
-    Already Have An Account? <a href="{% url 'users:login' %}">Sign In</a>
-</small>
-{% endblock content %}
+    <p class="text-center mt-3">
+        Already have an account? <a href="{% url 'users:login' %}" class="text-primary">Sign In</a>
+    </p>
+</div>
+{% endblock %}

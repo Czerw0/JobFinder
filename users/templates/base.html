@@ -1,34 +1,157 @@
 <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Job Finder</title>
-    </head>
-    <body>
-        <header>
-            <h1><a href="{% url 'jobfinder:home' %}">Job Finder</a></h1> 
-            <div>
-                {% if user.is_authenticated %}
-                    <a href="{% url 'users:view_cv' %}">My CV</a> 
-                    <a href="{% url 'jobfinder:job_list' %}">Job Listings</a>
-                    {% if user_cv %}
-                    <a href="{% url 'jobfinder:match_jobs_view' user_cv.id %}">Matched Jobs</a>
-                    {% endif %}
-                    <form style="display: inline;" method="POST" action="{% url 'users:logout' %}">
-                        {% csrf_token %}
-                        <button type="submit">Logout</button>
-                    </form>
-                {% else %}
-                    <a href="{% url 'users:login' %}">Login</a>
-                    <a href="{% url 'users:register' %}">Register</a>
-                    <a href="{% url 'users:view_cv' %}">My CV</a>
-                {% endif %}
-            </div>
-            <hr>
-        </header>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Job Finder{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        /* GLOBAL STYLES */
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f8fa;
+            color: #111;
+        }
+        a { text-decoration: none; }
+        h1, h2, h3 { color: #0d6efd; }
 
-        <main>
-            {% block content %}{% endblock %}
-        </main>
-    </body>
-    </html>
- 
+        header {
+            background-color: #fff;
+            padding: 20px 40px;
+            border-bottom: 2px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 a {
+            color: #0d6efd;
+        }
+
+        header div a, header div form button {
+            margin-left: 15px;
+            font-weight: 500;
+            color: #111;
+        }
+
+        header div form button {
+            background-color: #0d6efd;
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        header div form button:hover {
+            background-color: #084298;
+        }
+
+        main {
+            padding: 40px;
+        }
+
+        /* BUTTONS */
+        .btn-primary {
+            background-color: #0d6efd;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #084298;
+        }
+
+        .btn-outline-primary {
+            border-color: #0d6efd;
+            color: #0d6efd;
+        }
+        .btn-outline-primary:hover {
+            background-color: #0d6efd;
+            color: #fff;
+        }
+
+        /* CARDS */
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+        }
+
+        /* FORM STYLING */
+        input, textarea, select {
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            padding: 8px;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        label { font-weight: 600; }
+
+        .cv-section {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .cv-section h3 {
+            color: #0d6efd;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 6px;
+        }
+
+        .save-btn {
+            background-color: #0d6efd;
+            color: #fff;
+            border: none;
+            padding: 10px 25px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .save-btn:hover {
+            background-color: #084298;
+        }
+
+        details summary {
+            cursor: pointer;
+            color: #0d6efd;
+            font-weight: 500;
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<header>
+    <h1><a href="{% url 'jobfinder:home' %}">Job Finder</a></h1>
+    <div>
+        {% if user.is_authenticated %}
+            <a href="{% url 'users:view_cv' %}">My CV</a> 
+            <a href="{% url 'jobfinder:job_list' %}">Jobs</a>
+            {% if user_cv %}
+                <a href="{% url 'jobfinder:match_jobs_view' user_cv.id %}">Matches</a>
+            {% endif %}
+            <form style="display:inline;" method="POST" action="{% url 'users:logout' %}">
+                {% csrf_token %}
+                <button type="submit">Logout</button>
+            </form>
+        {% else %}
+            <a href="{% url 'users:login' %}">Login</a>
+            <a href="{% url 'users:register' %}">Register</a>
+        {% endif %}
+    </div>
+</header>
+
+<main>
+    {% block content %}{% endblock %}
+</main>
+
+</body>
+</html>

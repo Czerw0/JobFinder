@@ -1,169 +1,112 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="container my-5">
+    <h2 class="mb-4 text-center">Manage Your CV</h2>
 
-<style>
-    .cv-section {
-        margin-top: 25px;
-        padding: 15px 20px;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-    }
+    <form method="POST">
+        {% csrf_token %}
 
-    .cv-section h3 {
-        margin-top: 0;
-        margin-bottom: 15px;
-        font-size: 20px;
-        border-bottom: 1px solid #ddd;
-        padding-bottom: 5px;
-    }
-
-    .cv-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
-        margin-bottom: 15px;
-    }
-
-    .cv-grid-3 {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 15px;
-        margin-bottom: 15px;
-    }
-
-    label {
-        font-weight: bold;
-        display: block;
-        margin-bottom: 4px;
-    }
-
-    textarea, input, select {
-        width: 100%;
-        padding: 8px;
-        border: 1px solid #bbb;
-        border-radius: 5px;
-    }
-
-    .save-btn {
-        margin-top: 20px;
-        padding: 10px 20px;
-        background: #4b79ff;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-    }
-
-    .save-btn:hover {
-        background: #3558d4;
-    }
-</style>
-
-<h2>Manage Your CV</h2>
-
-<form method="POST">
-    {% csrf_token %}
-
-    <!-- CONTACT -->
-    <div class="cv-section">
-        <h3>Contact Information</h3>
-        <div class="cv-grid">
-            <div>
-                <label for="{{ form.full_name.id_for_label }}">Full Name</label>
-                {{ form.full_name }}
-            </div>
-            <div>
-                <label for="{{ form.email.id_for_label }}">Email</label>
-                {{ form.email }}
-            </div>
-            <div>
-                <label for="{{ form.phone_number.id_for_label }}">Phone Number</label>
-                {{ form.phone_number }}
-            </div>
-        </div>
-    </div>
-
-    <!-- ONLINE PROFILES -->
-    <div class="cv-section">
-        <h3>Online Profiles</h3>
-        <div class="cv-grid">
-            <div>
-                <label>GitHub</label>
-                {{ form.github_profile }}
-            </div>
-            <div>
-                <label>LinkedIn</label>
-                {{ form.linkedin_profile }}
-            </div>
-        </div>
-    </div>
-
-    <!-- SKILLS -->
-    <div class="cv-section">
-        <h3>Skills & Technologies</h3>
-        <div class="cv-grid">
-            <div>
-                <label>Skills</label>
-                {{ form.skills }}
-            </div>
-            <div>
-                <label>Technologies</label>
-                {{ form.technologies }}
-            </div>
-        </div>
-    </div>
-
-    <!-- PREFERENCES -->
-    <div class="cv-section">
-        <h3>Preferences for Matching</h3>
-        <div class="cv-grid">
-            <div>
-                <label>Preferred Roles</label>
-                {{ form.preferred_roles }}
-            </div>
-            <div>
-                <label>Preferred Locations</label>
-                {{ form.preferred_locations }}
+        <!-- CONTACT INFORMATION -->
+        <div class="cv-section">
+            <h3>Contact Information</h3>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="{{ form.full_name.id_for_label }}">Full Name</label>
+                    {{ form.full_name }}
+                </div>
+                <div class="col-md-4">
+                    <label for="{{ form.email.id_for_label }}">Email</label>
+                    {{ form.email }}
+                </div>
+                <div class="col-md-4">
+                    <label for="{{ form.phone_number.id_for_label }}">Phone Number</label>
+                    {{ form.phone_number }}
+                </div>
             </div>
         </div>
 
-        <div class="cv-grid-3">
-            <div>
-                <label>Seniority</label>
-                {{ form.job_seniority }}
-            </div>
-            <div>
-                <label>Work Type</label>
-                {{ form.job_type_preference }}
-            </div>
-            <div>
-                <label>Industry Preference</label>
-                {{ form.industry_preference }}
-            </div>
-        </div>
-    </div>
-
-    <!-- EXPERIENCE -->
-    <div class="cv-section">
-        <h3>Experience & Education</h3>
-        <div class="cv-grid">
-            <div>
-                <label>Years of Experience</label>
-                {{ form.experience_years }}
+        <!-- ONLINE PROFILES -->
+        <div class="cv-section">
+            <h3>Online Profiles</h3>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label>GitHub</label>
+                    {{ form.github_profile }}
+                </div>
+                <div class="col-md-6">
+                    <label>LinkedIn</label>
+                    {{ form.linkedin_profile }}
+                </div>
             </div>
         </div>
 
-        <label>Experience</label>
-        {{ form.experience }}
+        <!-- SKILLS & TECHNOLOGIES -->
+        <div class="cv-section">
+            <h3>Skills & Technologies</h3>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label>Skills</label>
+                    {{ form.skills }}
+                </div>
+                <div class="col-md-6">
+                    <label>Technologies</label>
+                    {{ form.technologies }}
+                </div>
+            </div>
+        </div>
 
-        <label style="margin-top: 15px;">Education</label>
-        {{ form.education }}
+        <!-- PREFERENCES -->
+        <div class="cv-section">
+            <h3>Preferences for Matching</h3>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label>Preferred Roles</label>
+                    {{ form.preferred_roles }}
+                </div>
+                <div class="col-md-6">
+                    <label>Preferred Locations</label>
+                    {{ form.preferred_locations }}
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label>Seniority</label>
+                    {{ form.job_seniority }}
+                </div>
+                <div class="col-md-4">
+                    <label>Work Type</label>
+                    {{ form.job_type_preference }}
+                </div>
+                <div class="col-md-4">
+                    <label>Industry Preference</label>
+                    {{ form.industry_preference }}
+                </div>
+            </div>
+        </div>
 
-        <label style="margin-top: 15px;">Languages</label>
-        {{ form.languages }}
-    </div>
+        <!-- EXPERIENCE & EDUCATION -->
+        <div class="cv-section">
+            <h3>Experience & Education</h3>
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <label>Years of Experience</label>
+                    {{ form.experience_years }}
+                </div>
+            </div>
 
-    <button type="submit" class="save-btn">Save CV</button>
-</form>
+            <label>Experience</label>
+            {{ form.experience }}
 
+            <label class="mt-3">Education</label>
+            {{ form.education }}
+
+            <label class="mt-3">Languages</label>
+            {{ form.languages }}
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="save-btn">Save CV</button>
+        </div>
+    </form>
+</div>
 {% endblock %}

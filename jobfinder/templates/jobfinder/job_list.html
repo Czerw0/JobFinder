@@ -1,169 +1,50 @@
 {% extends "base.html" %}
-
-{% block title %}Job Listings - Job Finder{% endblock %}
-
-{% block extra_css %}
-<style>
-    /* Smooth hover effect for cards */
-    .job-card {
-        border: none;
-        border-radius: 12px;
-        background: #fff;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .job-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 24px rgba(0,0,0,0.1);
-    }
-
-    /* Left border indicator strip */
-    .job-card.status-active { border-left: 5px solid #198754; }
-    .job-card.status-stale { border-left: 5px solid #ffc107; }
-    .job-card.status-archived { border-left: 5px solid #6c757d; opacity: 0.85; }
-
-    /* Typography tweaks */
-    .company-name {
-        color: #6c757d;
-        font-weight: 600;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .job-title {
-        font-weight: 700;
-        color: #2c3e50;
-        text-decoration: none;
-    }
-    .job-title:hover {
-        color: #0d6efd;
-    }
-
-    /* Tag styling */
-    .tag-badge {
-        font-size: 0.75rem;
-        padding: 0.35em 0.8em;
-        border-radius: 50rem; /* Pill shape */
-        background-color: #eef2f7;
-        color: #495057;
-        font-weight: 500;
-    }
-
-    /* Status badges on top right */
-    .status-badge {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-
-    /* Button styling */
-    .btn-apply {
-        border-radius: 8px;
-        font-weight: 600;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="my-5">
-    <div class="text-center mb-5">
-        <h1 class="fw-bold display-5">Explore Opportunities</h1>
-        <p class="text-muted">Found {{ jobs.count }} positions waiting for you.</p>
-    </div>
-
+<div class="container my-5">
+    <h2 class="mb-4 text-center">Job Listings</h2>
     {% if jobs %}
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             {% for job in jobs %}
-                {% if job.company and job.job_url %}
-                    <div class="col">
-                        <!-- 
-                           Logic for CSS classes based on status. 
-                           Assuming 'archived' is a string or property.
-                        -->
-                        <div class="card h-100 job-card shadow-sm 
-                            {% if job.status == 'archived' %} status-archived
-                            {% elif job.is_potentially_stale %} status-stale
-                            {% else %} status-active {% endif %}">
-                            
-                            <div class="card-body d-flex flex-column p-4">
-                                <!-- Header: Company & Date -->
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <span class="company-name">
-                                        <i class="bi bi-building"></i> {{ job.company }}
-                                    </span>
-                                </div>
+                <div class="col">
+                    <div class="card p-3 h-100">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="company-name">{{ job.company }}</span>
+                        </div>
+                        <h5 class="mb-2">
+                            <a href="{{ job.job_url }}" target="_blank" class="job-title stretched-link">{{ job.title }}</a>
+                        </h5>
+                        <p class="text-muted small mb-2"> {{ job.location|default:"Remote / Unspecified" }}</p>
+                        {% if job.salary %}
+                            <p class="text-muted small mb-2"> {{ job.salary }}</p>
+                        {% endif %}
 
-                                <!-- Title -->
-                                <h5 class="card-title mb-3">
-                                    <a href="{{ job.job_url }}" target="_blank" class="job-title stretched-link">
-                                        {{ job.title }}
-                                    </a>
-                                </h5>
-
-                                <!-- Location & Salary -->
-                                <div class="mb-3 text-muted small">
-                                    <div class="mb-1">
-                                        📍 {{ job.location|default:"Remote / Unspecified" }}
-                                    </div>
-                                    {% if job.salary %}
-                                    <div>
-                                        💰 {{ job.salary }}
-                                    </div>
-                                    {% endif %}
-                                </div>
-
-                                <!-- Tags -->
-                                {% if job.attributes %}
-                                    <div class="mb-4">
-                                        {% for tag in job.attributes.all %} 
-                                            <!-- Note: Added .all assuming attributes is a ManyToMany relationship -->
-                                            <span class="tag-badge me-1 mb-1 d-inline-block">
-                                                {{ tag }}
-                                            </span>
-                                        {% empty %}
-                                            <!-- Fallback if attributes is a list of strings -->
-                                            {% for tag in job.attributes %}
-                                                <span class="tag-badge me-1 mb-1 d-inline-block">
-                                                    {{ tag }}
-                                                </span>
-                                            {% endfor %}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-
-                                <!-- Footer Area -->
-                                <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
-                                    <small class="text-muted">
-                                        Posted {{ job.date_posted|timesince }} ago
-                                    </small>
-
-                                    <!-- Dynamic Status Text/Badge -->
-                                    {% if job.status == 'archived' %}
-                                        <span class="badge bg-secondary rounded-pill">Archived</span>
-                                    {% elif job.is_potentially_stale %}
-                                        <span class="badge bg-warning text-dark rounded-pill" title="Last checked > 20 days ago">Stale</span>
-                                    {% else %}
-                                        <span class="badge bg-success rounded-pill">Active</span>
-                                    {% endif %}
-                                </div>
+                        {% if job.attributes %}
+                            <div class="mb-3">
+                                {% for tag in job.attributes.all %}
+                                    <span class="badge bg-light text-dark me-1">{{ tag }}</span>
+                                {% endfor %}
                             </div>
+                        {% endif %}
+
+                        <div class="mt-auto d-flex justify-content-between align-items-center">
+                            <small class="text-muted">Posted {{ job.date_posted|timesince }} ago</small>
+                            {% if job.status == 'archived' %}
+                                <span class="badge bg-secondary">Archived</span>
+                            {% elif job.is_potentially_stale %}
+                                <span class="badge bg-warning text-dark">Stale</span>
+                            {% else %}
+                                <span class="badge bg-success">Active</span>
+                            {% endif %}
                         </div>
                     </div>
-                {% endif %}
+                </div>
             {% endfor %}
         </div>
     {% else %}
-        <!-- Empty State -->
         <div class="text-center py-5">
-            <div class="alert alert-light border shadow-sm d-inline-block px-5 py-4">
-                <h4 class="alert-heading text-muted">No jobs found yet 🕵️‍♂️</h4>
-                <p class="mb-0">Run the <code>scrape_remotejobs</code> command to populate the list.</p>
+            <div class="alert alert-light shadow-sm d-inline-block p-4">
+                <h4 class="text-muted">No jobs found yet </h4>
+                <p>Run <code>scrape_remotejobs</code> to populate the list.</p>
             </div>
         </div>
     {% endif %}

@@ -1,5 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
-    <h2>Welcome to Job Finder!</h2>
-    <p>This is the homepage. You are logged in as {{ user.username }}.</p>
-{% endblock content %}
+<div class="container text-center" style="padding: 60px 0;">
+    <h2 class="mb-3">Welcome to Job Finder!</h2>
+    {% if user.is_authenticated %}
+        <p class="text-muted">You are logged in as <strong>{{ user.username }}</strong>.</p>
+    {% else %}
+        <p class="text-muted">Please <a href="{% url 'users:login' %}" class="text-primary">log in</a> or <a href="{% url 'users:register' %}" class="text-primary">register</a> to start applying.</p>
+    {% endif %}
+</div>
+{% endblock %}

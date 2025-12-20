@@ -1,65 +1,28 @@
 {% extends "base.html" %}
-
 {% block content %}
-<h2>Matched Jobs for {{ cv.full_name }}</h2>
-<p class="text-muted">Showing top {{ top }} matches</p>
+<div class="container my-5">
+    <h2 class="mb-3">Matched Jobs for {{ cv.full_name }}</h2>
+    <p class="text-muted mb-4">Showing top {{ top }} matches</p>
 
-<ul class="list-group mt-4">
-
-    {% for job in results %}
-        <li class="list-group-item">
-
-            <!-- Job title as link -->
-            <h5 class="mb-1">
-                <a href="{{ job.job_url }}" target="_blank" rel="noopener noreferrer">
-                    {{ job.title }}
-                </a>
-            </h5>
-
-            <!-- Company + location -->
-            <p class="mb-1">
-                <strong>{{ job.company }}</strong>
-                {% if job.location %}
-                    · {{ job.location }}
+    <ul class="list-group">
+        {% for job in results %}
+            <li class="list-group-item mb-3 shadow-sm rounded">
+                <h5><a href="{{ job.job_url }}" target="_blank" class="text-primary">{{ job.title }}</a></h5>
+                <p><strong>{{ job.company }}</strong>{% if job.location %} · {{ job.location }}{% endif %}</p>
+                {% if job.match_score %}
+                    <p>Match Score: {{ job.match_score|floatformat:2 }}%</p>
                 {% endif %}
-            </p>
-
-            <!-- Match score -->
-            {% if job.match_score %}
-                <p class="mb-2">
-                    <strong>Match score:</strong>
-                    {{ job.match_score|floatformat:2 }}%
-                </p>
-            {% endif %}
-
-            <!-- Optional description toggle -->
-            {% if job.description %}
-                <details>
-                    <summary class="text-primary" style="cursor:pointer;">
-                        Show job description
-                    </summary>
-                    <p class="mt-2">
-                        {{ job.description|linebreaksbr }}
-                    </p>
-                </details>
-            {% endif %}
-
-            <!-- Apply button -->
-            <div class="mt-2">
-                <a href="{{ job.job_url }}"
-                   target="_blank"
-                   rel="noopener noreferrer"
-                   class="btn btn-sm btn-outline-primary">
-                    Apply →
-                </a>
-            </div>
-
-        </li>
-    {% empty %}
-        <li class="list-group-item text-muted">
-            No matches found.
-        </li>
-    {% endfor %}
-
-</ul>
+                {% if job.description %}
+                    <details>
+                        <summary>Show job description</summary>
+                        <p>{{ job.description|linebreaksbr }}</p>
+                    </details>
+                {% endif %}
+                <a href="{{ job.job_url }}" target="_blank" class="btn btn-outline-primary mt-2">Apply →</a>
+            </li>
+        {% empty %}
+            <li class="list-group-item text-muted">No matches found.</li>
+        {% endfor %}
+    </ul>
+</div>
 {% endblock %}
