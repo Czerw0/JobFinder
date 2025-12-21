@@ -5,6 +5,7 @@ from django.core.management import call_command
 from django.utils import timezone
 from datetime import timedelta
 import threading
+from django.db.models import Q
 
 from .models import Job
 from .match_jobs import match_jobs_to_cv
@@ -56,8 +57,61 @@ def job_list(request):
     archiver_thread.start()
     archiver_thread.join()
 
-    jobs = Job.objects.filter(status=Job.STATUS_ACTIVE).order_by('-date_last_seen')
-    return render(request, 'jobfinder/job_list.html', {'jobs': jobs})
+    # Build base queryset
+    queryset = Job.objects.filter(status=Job.STATUS_ACTIVE)
+
+    # --- Filtering parameters ---
+    # Simple text search over title/company/description
+    q = request.GET.get('q', '').strip()
+    if q:
+        queryset = queryset.filter(
+            Q(title__icontains=q)
+        )
+
+    # Location filter (partial match)
+    location = request.GET.get('location', '').strip().lower()
+    if location:
+        queryset = queryset.filter(location__icontains=location)
+
+    # Tags (attributes) filter - allow ?tag=python&tag=django or ?tags=python,django
+    tags = []
+    # multiple repeated params: ?tag=python&tag=django
+    tags += request.GET.getlist('tag')
+    # comma-separated param: ?tags=python,django
+    tags_param = request.GET.get('tags', '')
+    if tags_param:
+        tags += [t.strip() for t in tags_param.split(',') if t.strip()]
+
+    if tags:
+        tags_q = Q()
+        for t in tags:
+            # attributes is stored as a JSON list; use contains to find element
+            tags_q |= Q(attributes__contains=[t])
+        queryset = queryset.filter(tags_q)
+
+    # Remote filter: ?remote=remote  (only remote), ?remote=onsite (exclude remote)
+    remote = request.GET.get('remote', '').strip().lower()
+    if remote in ('1', 'true', 'yes', 'remote', 'only'):
+        queryset = queryset.filter(
+            Q(location__icontains='remote') | Q(attributes__contains=['remote'])
+        )
+    elif remote in ('0', 'false', 'no', 'onsite'):
+        queryset = queryset.exclude(
+            Q(location__icontains='remote') | Q(attributes__contains=['remote'])
+        )
+
+    # Final ordering
+    jobs = queryset.order_by('-date_last_seen')
+
+    # Pass current filter params to template for pre-filling the form
+    filter_params = {
+        'q': q,
+        'location': location,
+        'tags': ",".join(tags),
+        'remote': remote,
+    }
+
+    return render(request, 'jobfinder/job_list.html', {'jobs': jobs, 'filter_params': filter_params})
 
 
 # MATCHING – JSON API
@@ -107,6 +161,23 @@ def match_jobs_view(request, cv_id):
 
     return render(request, "jobfinder/match_results.html", {
         "cv": cv,
-        "results": results,   # ✅ matches template
+        "results": results,   # matches template
         "top": top_n
+    })
+
+
+def filter(request, cv_id):
+    """
+    View showing jobs that match a given CV.
+    """
+
+    cv = get_object_or_404(CV, id=cv_id)
+    results = match_jobs_to_cv(cv.id, top_n=1000)  # get all matches
+
+    matched_job_ids = [r["job"].id for r in results]
+    jobs = Job.objects.filter(id__in=matched_job_ids, status=Job.STATUS_ACTIVE)
+
+    return render(request, 'jobfinder/job_list.html', {
+        'jobs': jobs,
+        'filter_cv': cv
     })

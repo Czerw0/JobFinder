@@ -146,12 +146,25 @@ def match_jobs_to_cv(cv_id, top_n=5):
         # boost if role appears in job title
         if any(role in rec["title"] for role in cv_roles):
             score += 0.10
+        
+        # Location / remote preferences
+        pref = getattr(cv, "job_type_preference", None)
 
-        # location / remote preferences
-        if cv.job_type_preference == "remote" and "remote" in rec["location"]:
-            score += 0.10
-        elif any(loc in rec["location"] for loc in cv_locations):
-            score += 0.05
+        if pref == "remote":
+            if "remote" in rec.get("location", "").lower():
+                score += 0.10
+            else:
+                # Penalize non-remote when candidate wants remote
+                score *= 0.70
+        else:
+            # Prefer matching locations
+            if any(loc.lower() in rec.get("location", "").lower() for loc in cv_locations):
+                score += 0.05
+            else:
+                # If candidate specified preferred locations and this job doesn't match, apply small penalty
+                if cv_locations:
+                    score *= 0.85
+
 
         # penalize if seniority mismatch, but don't zero out
         if not (rec["seniority"] & allowed_seniority):

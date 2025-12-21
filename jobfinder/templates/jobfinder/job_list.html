@@ -1,7 +1,41 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container my-5">
-    <h2 class="mb-4 text-center">Job Listings</h2>
+    <h2 class="mb-4 text-center">{{ jobs.count }} jobs are waiting for you</h2>
+
+    <!-- Filter form -->
+    <form method="get" class="row gy-2 gx-2 align-items-end mb-4">
+        <div class="col-12 col-md-4">
+            <label class="form-label small">Search</label>
+            <input name="q" type="text" class="form-control" placeholder="title, company or keywords"
+                   value="{{ filter_params.q}}">
+        </div>
+        <div class="col-12 col-md-3">
+            <label class="form-label small">Location</label>
+            <input name="location" type="text" class="form-control" placeholder="city or remote"
+                   value="{{ filter_params.location }}">
+        </div>
+        <div class="col-12 col-md-3">
+            <label class="form-label small">Tags (comma-separated)</label>
+            <input name="tags" type="text" class="form-control" placeholder="python,django,manager"
+                   value="{{ filter_params.tags }}">
+        </div>
+        <div class="col-9 col-md-1">
+            <label class="form-label small">Remote</label>
+            <select name="remote" class="form-select">
+                <option value="" {% if not filter_params.remote %}selected{% endif %}>Any</option>
+                <option value="remote" {% if filter_params.remote == 'remote' %}selected{% endif %}>Remote only</option>
+                <option value="onsite" {% if filter_params.remote == 'onsite' %}selected{% endif %}>Onsite only</option>
+            </select>
+        </div>
+        <div class="col-3 col-md-1">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
+        </div>
+        <div class="col-12">
+            <a href="{{ request.path }}" class="small">Clear filters</a>
+        </div>
+    </form>
+
     {% if jobs %}
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             {% for job in jobs %}
@@ -20,8 +54,8 @@
 
                         {% if job.attributes %}
                             <div class="mb-3">
-                                {% for tag in job.attributes.all %}
-                                    <span class="badge bg-light text-dark me-1">{{ tag }}</span>
+                                {% for tag in job.attributes %}
+                                    <span class="badge bg-light text-dark me-2">{{ tag }}</span>
                                 {% endfor %}
                             </div>
                         {% endif %}
@@ -44,7 +78,7 @@
         <div class="text-center py-5">
             <div class="alert alert-light shadow-sm d-inline-block p-4">
                 <h4 class="text-muted">No jobs found yet </h4>
-                <p>Run <code>scrape_remotejobs</code> to populate the list.</p>
+                <p>Come back later or change the filtering</p>
             </div>
         </div>
     {% endif %}
