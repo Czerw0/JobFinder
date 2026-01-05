@@ -151,18 +151,21 @@ def match_jobs(request, cv_id):
 
 # MATCHING – HTML VIEW
 def match_jobs_view(request, cv_id):
-    try:
-        top_n = int(request.GET.get("top", 5))
-    except ValueError:
-        top_n = 5
-
     cv = get_object_or_404(CV, id=cv_id)
-    results = match_jobs_to_cv(cv.id, top_n)
+    top = int(request.GET.get("top", 5))
+    results = match_jobs_to_cv(cv_id, top_n=top) or []
+
+    # add percent-friendly value for template
+    for r in results:
+        try:
+            r["score_pct"] = round(float(r.get("score", 0)) * 100, 2)
+        except Exception:
+            r["score_pct"] = None
 
     return render(request, "jobfinder/match_results.html", {
         "cv": cv,
-        "results": results,   # matches template
-        "top": top_n
+        "results": results,
+        "top": top,
     })
 
 

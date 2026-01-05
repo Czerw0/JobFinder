@@ -5,21 +5,31 @@
     <p class="text-muted mb-4">Showing top {{ top }} matches</p>
 
     <ul class="list-group">
-        {% for job in results %}
+        {% for r in results %}
+            {% with job=r.job %}
             <li class="list-group-item mb-3 shadow-sm rounded">
                 <h5><a href="{{ job.job_url }}" target="_blank" class="text-primary">{{ job.title }}</a></h5>
                 <p><strong>{{ job.company }}</strong>{% if job.location %} · {{ job.location }}{% endif %}</p>
-                {% if job.match_score %}
-                    <p>Match Score: {{ job.match_score|floatformat:2 }}%</p>
+
+                {% if r.score_pct is not None %}
+                    <p>Match Score: {{ r.score_pct|floatformat:2 }}%</p>
+                {% elif job.match_score %}
+                    <p>Match Score: {{ job.match_score|floatformat:2 }}</p>
                 {% endif %}
+
                 {% if job.description %}
                     <details>
                         <summary>Show job description</summary>
                         <p>{{ job.description|linebreaksbr }}</p>
                     </details>
                 {% endif %}
+
+                {% if r.seniority_match %}
+                    <span class="badge bg-success">Seniority match</span>
+                {% endif %}
                 <a href="{{ job.job_url }}" target="_blank" class="btn btn-outline-primary mt-2">Apply →</a>
             </li>
+            {% endwith %}
         {% empty %}
             <li class="list-group-item text-muted">No matches found.</li>
         {% endfor %}
