@@ -181,6 +181,14 @@ LOGGING = {
             "backupCount": 3,
             "formatter": "standard",
         },
+        "delete_file": {
+            "level": "INFO",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(LOG_DIR, "delete.log"),
+            "maxBytes": 5*1024*1024,
+            "backupCount": 3,
+            "formatter": "standard",
+        },
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "standard",

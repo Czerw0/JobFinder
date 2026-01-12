@@ -11,10 +11,10 @@
                 <h5><a href="{{ job.job_url }}" target="_blank" class="text-primary">{{ job.title }}</a></h5>
                 <p><strong>{{ job.company }}</strong>{% if job.location %} · {{ job.location }}{% endif %}</p>
 
-                {% if r.score_pct is not None %}
-                    <p>Match Score: {{ r.score_pct|floatformat:2 }}%</p>
+                {% if r.score is not None %}
+                    <p>Match Score: {{ r.score|floatformat:2 }}%</p>
                 {% elif job.match_score %}
-                    <p>Match Score: {{ job.match_score|floatformat:2 }}</p>
+                    <p>Match Score: {{ job.match_score|floatformat:2 }}%</p>
                 {% endif %}
 
                 {% if job.description %}
@@ -24,9 +24,6 @@
                     </details>
                 {% endif %}
 
-                {% if r.seniority_match %}
-                    <span class="badge bg-success">Seniority match</span>
-                {% endif %}
                 <a href="{{ job.job_url }}" target="_blank" class="btn btn-outline-primary mt-2">Apply →</a>
             </li>
             {% endwith %}

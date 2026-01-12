@@ -5,6 +5,7 @@ from django.db import transaction # for atomic database transactions
 from jobfinder.models import Job
 from datetime import datetime # for handling date and time
 from jobfinder.logging_config import setup_logger # custom logger setup
+from django.utils import timezone
 
 logger = setup_logger("scraper", "scraper.log")
 
@@ -100,10 +101,14 @@ class Command(BaseCommand):
                     "status": Job.STATUS_ACTIVE,
                 }
 
-                _, created = Job.objects.update_or_create(
+                job, created = Job.objects.update_or_create(
                     job_url=url,
                     defaults=defaults
                 )
+
+                # when creating/updating job objects set date_last_seen = timezone.now()
+                job.date_last_seen = timezone.now()
+                job.save()
 
                 new_jobs += int(created)
                 updated_jobs += int(not created)

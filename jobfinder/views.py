@@ -24,60 +24,41 @@ def home(request):
 def job_list(request):
     """
     Shows all active jobs.
-    Refreshes API + archives stale jobs in background threads.
+    Refreshes and archives on every request.
     """
 
-    def refresh_api():
-        scraper_logger.info("Refreshing jobs...")
-        try:
-            call_command('scrape_remotejobs')
-            scraper_logger.info("Scraping finished.")
-        except Exception as e:
-            scraper_logger.error(f"Scraping error: {e}", exc_info=True)
+    # Refresh jobs
+    try:
+        call_command("scrape_remotejobs")
+    except Exception as e:
+        print(f"Scraping error: {e}")
 
-    def archive_stale_jobs():
-        archiver_logger.info("Archiving stale jobs...")
-        try:
-            threshold = timezone.now() - timedelta(days=60)
-            stale_jobs = Job.objects.filter(
-                status=Job.STATUS_ACTIVE,
-                date_last_seen__lt=threshold
-            )
+    #Archive stale jobs 
+    try:
+        # call the management command implemented in archive_old_jobs.py
+        call_command("archive_old_jobs")
+    except Exception as e:
+        print(f"Archiving error: {e}")
+    
+    #Delete stale jobs
+    try:
+        call_command("delete_stale_jobs")
+    except Exception as e:
+        print(f"Deleting error: {e}")
 
-            for job in stale_jobs:
-                job.status = Job.STATUS_ARCHIVED
-                job.save()
-                archiver_logger.info(f"Archived: {job.title}")
-
-        except Exception as e:
-            archiver_logger.error(f"Archiving error: {e}", exc_info=True)
-
-    threading.Thread(target=refresh_api).start()
-    archiver_thread = threading.Thread(target=archive_stale_jobs)
-    archiver_thread.start()
-    archiver_thread.join()
-
-    # Build base queryset
+    #Query active jobs
     queryset = Job.objects.filter(status=Job.STATUS_ACTIVE)
 
-    # --- Filtering parameters ---
-    # Simple text search over title/company/description
     q = request.GET.get('q', '').strip()
     if q:
-        queryset = queryset.filter(
-            Q(title__icontains=q)
-        )
+        queryset = queryset.filter(Q(title__icontains=q))
 
-    # Location filter (partial match)
     location = request.GET.get('location', '').strip().lower()
     if location:
         queryset = queryset.filter(location__icontains=location)
 
-    # Tags (attributes) filter - allow ?tag=python&tag=django or ?tags=python,django
     tags = []
-    # multiple repeated params: ?tag=python&tag=django
     tags += request.GET.getlist('tag')
-    # comma-separated param: ?tags=python,django
     tags_param = request.GET.get('tags', '')
     if tags_param:
         tags += [t.strip() for t in tags_param.split(',') if t.strip()]
@@ -85,11 +66,9 @@ def job_list(request):
     if tags:
         tags_q = Q()
         for t in tags:
-            # attributes is stored as a JSON list; use contains to find element
             tags_q |= Q(attributes__contains=[t])
         queryset = queryset.filter(tags_q)
 
-    # Remote filter: ?remote=remote  (only remote), ?remote=onsite (exclude remote)
     remote = request.GET.get('remote', '').strip().lower()
     if remote in ('1', 'true', 'yes', 'remote', 'only'):
         queryset = queryset.filter(
@@ -100,10 +79,8 @@ def job_list(request):
             Q(location__icontains='remote') | Q(attributes__contains=['remote'])
         )
 
-    # Final ordering
     jobs = queryset.order_by('-date_last_seen')
 
-    # Pass current filter params to template for pre-filling the form
     filter_params = {
         'q': q,
         'location': location,
@@ -111,7 +88,11 @@ def job_list(request):
         'remote': remote,
     }
 
-    return render(request, 'jobfinder/job_list.html', {'jobs': jobs, 'filter_params': filter_params})
+    return render(request, 'jobfinder/job_list.html', {
+        'jobs': jobs,
+        'filter_params': filter_params
+    })
+
 
 
 # MATCHING – JSON API

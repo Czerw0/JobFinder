@@ -131,66 +131,84 @@ def match_jobs_to_cv(cv_id, top_n=5):
         min_df=1,
     )
 
-    job_vectors = vectorizer.fit_transform(r["text"] for r in records)
+    job_vectors = vectorizer.fit_transform([r["text"] for r in records])
     cv_vector = vectorizer.transform([cv_text])
     similarities = cosine_similarity(cv_vector, job_vectors).flatten()
 
     results = []
+
+    # simpler scoring: baseline + additive boosts, multiplicative penalties
     for idx, rec in enumerate(records):
-        # lower semantic baseline to avoid generic matches dominating
-        score = float(similarities[idx]) * 0.30
+        sim = float(similarities[idx]) if idx < len(similarities) else 0.0
 
-        # Boosts for explicit tech/skills in title/tags (stronger weight)
+        # baseline to bias results toward ~50% on average
+        score = 0.35
+
+        # semantic similarity (adds up to +0.25)
+        score += sim * 0.25
+
+        # skill matches (adds up to +0.20)
         exact_skill_matches = len(cv_skills & rec["job_tags"])
+        if cv_skills:
+            frac = exact_skill_matches / max(1, len(cv_skills))
+            score += 0.20 * frac
+
+        # tech matches (adds up to +0.15)
         exact_tech_matches = len(cv_tech & rec["job_tags"])
-        score += 0.20 * exact_skill_matches
-        score += 0.30 * exact_tech_matches
+        if cv_tech:
+            frac_tech = exact_tech_matches / max(1, len(cv_tech))
+            score += 0.15 * frac_tech
 
-        # Boost if job explicitly states seniority and it matches candidate allowed levels
-        seniority_match = bool(rec["seniority"] & allowed_seniority)
-        if rec["seniority"] and seniority_match:
-            score += 0.10
+        # seniority: small boost or multiplicative penalty
+        seniority_match = False
+        if rec["seniority"]:
+            seniority_match = bool(rec["seniority"] & allowed_seniority)
+            if seniority_match:
+                score += 0.05
+            else:
+                score *= 0.8
 
-        # Required experience handling: reward if candidate meets or exceeds requirement
+        # required experience: small boost or penalty
         req_exp = rec.get("required_experience")
         if req_exp is not None and cv.experience_years is not None:
             if cv.experience_years >= req_exp:
-                score += 0.20
+                score += 0.05
             else:
-                # candidate below requirement -> penalize moderately
-                score *= 0.7
+                score *= 0.8
 
-        # Role match (word boundaries)
-        if any(re.search(rf"\b{re.escape(role)}\b", rec["title"]) for role in cv_roles if role):
-            score += 0.08
+        # role/title match
+        if cv_roles:
+            role_match = any(re.search(rf"\b{re.escape(role)}\b", rec["title"]) for role in cv_roles if role)
+            if role_match:
+                score += 0.03
 
-        # Location / job type
+        # location / remote preference
         pref = getattr(cv, "job_type_preference", None)
         loc_field = rec.get("location", "")
         if pref == "remote":
             if "remote" in loc_field:
-                score += 0.08
+                score += 0.02
             else:
-                score *= 0.8
-        else:
-            if any(loc.lower() in loc_field for loc in cv_locations):
-                score += 0.10
+                score *= 0.95
+        elif cv_locations:
+            loc_match = any(loc.lower() in loc_field for loc in cv_locations)
+            if loc_match:
+                score += 0.03
             else:
-                if cv_locations:
-                    score *= 0.9
+                score *= 0.95
 
-        # Penalize only if job explicitly expresses seniority and it doesn't match
-        if rec["seniority"] and not seniority_match:
-            score *= 0.6
+        # clamp and convert to percent (0..100)
+        score = max(0.0, min(1.0, score))
+        percent_score = round(score * 100, 2)
 
         logger.debug(
-            f"Match | Job {rec['id']} | score={score:.4f} | sim={similarities[idx]:.4f} | "
-            f"req_exp={rec.get('required_experience')} skills={exact_skill_matches} techs={exact_tech_matches}"
+            f"Match | Job {rec['id']} | percent={percent_score:.2f}% | raw_score={score:.4f} "
+            f"| sim={sim:.4f} skills={exact_skill_matches} techs={exact_tech_matches}"
         )
 
         results.append({
             "job": rec["job"],
-            "score": round(score, 4),
+            "score": percent_score,
             "seniority_match": seniority_match,
             "experience_bucket": list(allowed_seniority),
         })
@@ -201,7 +219,8 @@ def match_jobs_to_cv(cv_id, top_n=5):
 
     for r in top_results:
         job_obj = r["job"]
-        job_obj.match_score = round(r["score"], 3)
+        bounded = max(0.0, min(100.0, float(r["score"])))
+        job_obj.match_score = bounded
         try:
             job_obj.save(update_fields=["match_score"])
         except Exception:
