@@ -164,7 +164,7 @@ def match_jobs_to_cv(cv_id, top_n=5):
         if rec["seniority"]:
             seniority_match = bool(rec["seniority"] & allowed_seniority)
             if seniority_match:
-                score += 0.05
+                score += 0.15
             else:
                 score *= 0.8
 
@@ -172,7 +172,7 @@ def match_jobs_to_cv(cv_id, top_n=5):
         req_exp = rec.get("required_experience")
         if req_exp is not None and cv.experience_years is not None:
             if cv.experience_years >= req_exp:
-                score += 0.05
+                score += 0.15
             else:
                 score *= 0.8
 
@@ -180,20 +180,20 @@ def match_jobs_to_cv(cv_id, top_n=5):
         if cv_roles:
             role_match = any(re.search(rf"\b{re.escape(role)}\b", rec["title"]) for role in cv_roles if role)
             if role_match:
-                score += 0.03
+                score += 0.10
 
         # location / remote preference
         pref = getattr(cv, "job_type_preference", None)
         loc_field = rec.get("location", "")
         if pref == "remote":
             if "remote" in loc_field:
-                score += 0.02
+                score += 0.15
             else:
                 score *= 0.95
         elif cv_locations:
             loc_match = any(loc.lower() in loc_field for loc in cv_locations)
             if loc_match:
-                score += 0.03
+                score += 0.10
             else:
                 score *= 0.95
 

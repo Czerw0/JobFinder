@@ -33,7 +33,7 @@ class Job(models.Model):
     def is_potentially_stale(self) -> bool:
         """
         Check if a job listing looks outdated. We flag jobs that haven't appeared
-        in our API feed for more than 20 days, so users know it might no longer be available.
+        in our API feed for more than 30 days, so users know it might no longer be available.
         """
         if not self.date_last_seen:
             return True  # Safety check - treat missing dates as stale
