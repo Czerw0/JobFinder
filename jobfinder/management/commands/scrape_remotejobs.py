@@ -11,7 +11,6 @@ logger = setup_logger("scraper", "scraper.log")
 
 
 class Command(BaseCommand):
-    help = "Scrapes job offers from RemoteOK and saves them to the database."
 
     API_URL = "https://remoteok.com/api"
     USER_AGENT = "JobFinderApp/1.0 (kczerwinski3@st.swps.edu.pl)"

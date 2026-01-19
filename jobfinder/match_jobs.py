@@ -2,7 +2,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer # for TF-IDF
 from sklearn.metrics.pairwise import cosine_similarity # for similarity calculation
 from jobfinder.models import Job
 from users.models import CV
-import pandas as pd
 import re # for text cleaning
 
 from jobfinder.logging_config import setup_logger

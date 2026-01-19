@@ -2,9 +2,6 @@ from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 from django.core.management import call_command
-from django.utils import timezone
-from datetime import timedelta
-import threading
 from django.db.models import Q
 
 from .models import Job

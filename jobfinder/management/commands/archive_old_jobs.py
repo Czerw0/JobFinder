@@ -4,11 +4,11 @@ from django.core.management.base import BaseCommand
 from django.db.models import Q
 from jobfinder.models import Job
 from jobfinder.logging_config import setup_logger
+
 logger = setup_logger("archiver", "archive.log")
 
 
 class Command(BaseCommand):
-    help = "Archives jobs that are no longer active based on last seen or posted date."
 
     def handle(self, *args, **options):
         # archive jobs not seen/posted for 30 days
