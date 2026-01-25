@@ -1,14 +1,14 @@
-from sklearn.feature_extraction.text import TfidfVectorizer # for TF-IDF
-from sklearn.metrics.pairwise import cosine_similarity # for similarity calculation
+from sklearn.feature_extraction.text import TfidfVectorizer # do TF-IDF
+from sklearn.metrics.pairwise import cosine_similarity # do obliczania podobieństwa
 from jobfinder.models import Job
 from users.models import CV
-import re # for text cleaning
+import re # do czyszczenia tekstu
 
 from jobfinder.logging_config import setup_logger
 logger = setup_logger("matcher", "matcher.log")
 
 
-# text normalization function
+# funkcja normalizacji tekstu
 def normalize_text(text: str) -> str:
     if not text:
         return ""
@@ -20,7 +20,7 @@ def normalize_text(text: str) -> str:
 
 
 
-# main matching function
+# główna funkcja dopasowywania
 def match_jobs_to_cv(cv_id, top_n=5):
     try:
         cv = CV.objects.get(id=cv_id)
@@ -60,7 +60,7 @@ def match_jobs_to_cv(cv_id, top_n=5):
                     found.add(level)
         return found
 
-    # detect required years in job text, return minimal integer if found
+    # wykryj wymagane lata w tekście oferty, zwróć minimalną liczbę całkowitą jeśli znaleziono
     def detect_required_experience(text):
         if not text:
             return None
@@ -73,7 +73,7 @@ def match_jobs_to_cv(cv_id, top_n=5):
                 return None
         return None
 
-    # Combine CV fields into a single text
+    # Połącz pola CV w jeden tekst
     cv_text = " ".join([
         normalize_text(cv.skills),
         normalize_text(cv.technologies),
@@ -136,7 +136,7 @@ def match_jobs_to_cv(cv_id, top_n=5):
 
     results = []
 
-    # simpler scoring: baseline + additive boosts, multiplicative penalties
+    # prostsze punktowanie: linia bazowa + addytywne wzmocnienia, multiplikatywne kary
     for idx, rec in enumerate(records):
         sim = float(similarities[idx]) if idx < len(similarities) else 0.0
 
@@ -146,19 +146,19 @@ def match_jobs_to_cv(cv_id, top_n=5):
         # semantic similarity (adds up to +0.25)
         score += sim * 0.25
 
-        # skill matches (adds up to +0.20)
+        # dopasowania umiejętności (dodaje do +0.20)
         exact_skill_matches = len(cv_skills & rec["job_tags"])
         if cv_skills:
             frac = exact_skill_matches / max(1, len(cv_skills))
             score += 0.20 * frac
 
-        # tech matches (adds up to +0.15)
+        # dopasowania technologii (dodaje do +0.15)
         exact_tech_matches = len(cv_tech & rec["job_tags"])
         if cv_tech:
             frac_tech = exact_tech_matches / max(1, len(cv_tech))
             score += 0.15 * frac_tech
 
-        # seniority: small boost or multiplicative penalty
+        # poziom zaawansowania: małe wzmocnienie lub kara multiplikatywna
         seniority_match = False
         if rec["seniority"]:
             seniority_match = bool(rec["seniority"] & allowed_seniority)
@@ -167,7 +167,7 @@ def match_jobs_to_cv(cv_id, top_n=5):
             else:
                 score *= 0.8
 
-        # required experience: small boost or penalty
+        # wymagane doświadczenie: małe wzmocnienie lub kara
         req_exp = rec.get("required_experience")
         if req_exp is not None and cv.experience_years is not None:
             if cv.experience_years >= req_exp:
@@ -175,13 +175,13 @@ def match_jobs_to_cv(cv_id, top_n=5):
             else:
                 score *= 0.8
 
-        # role/title match
+        # dopasowanie roli/tytułu
         if cv_roles:
             role_match = any(re.search(rf"\b{re.escape(role)}\b", rec["title"]) for role in cv_roles if role)
             if role_match:
                 score += 0.10
 
-        # location / remote preference
+        # preferencje lokalizacji / zdalnej pracy
         pref = getattr(cv, "job_type_preference", None)
         loc_field = rec.get("location", "")
         if pref == "remote":
@@ -196,7 +196,7 @@ def match_jobs_to_cv(cv_id, top_n=5):
             else:
                 score *= 0.95
 
-        # clamp and convert to percent (0..100)
+        # ogranicz i konwertuj na procent (0..100)
         score = max(0.0, min(1.0, score))
         percent_score = round(score * 100, 2)
 
@@ -212,7 +212,7 @@ def match_jobs_to_cv(cv_id, top_n=5):
             "experience_bucket": list(allowed_seniority),
         })
 
-    # sort and persist only top_n match_score to reduce DB writes
+    # sortuj i zapisuj tylko top_n match_score, aby zmniejszyć zapisy do bazy danych
     results.sort(key=lambda r: r["score"], reverse=True)
     top_results = results[:top_n]
 

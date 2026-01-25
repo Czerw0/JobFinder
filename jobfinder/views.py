@@ -20,30 +20,30 @@ def home(request):
 
 def job_list(request):
     """
-    Shows all active jobs.
-    Refreshes and archives on every request.
+    Pokazuje wszystkie aktywne oferty pracy.
+    Odświeża i archiwizuje przy każdym żądaniu.
     """
 
-    # Refresh jobs
+    # Odśwież oferty
     try:
         call_command("scrape_remotejobs")
     except Exception as e:
         print(f"Scraping error: {e}")
 
-    #Archive stale jobs 
+    #Archiwizuj przestarzałe oferty 
     try:
-        # call the management command implemented in archive_old_jobs.py
+        # wywołaj komendę zarządzania zaimplementowaną w archive_old_jobs.py
         call_command("archive_old_jobs")
     except Exception as e:
         print(f"Archiving error: {e}")
     
-    #Delete stale jobs
+    #Usuń przestarzałe oferty
     try:
         call_command("delete_stale_jobs")
     except Exception as e:
         print(f"Deleting error: {e}")
 
-    #Query active jobs
+    #Zapytanie o aktywne oferty
     queryset = Job.objects.filter(status=Job.STATUS_ACTIVE)
 
     q = request.GET.get('q', '').strip()
@@ -92,11 +92,11 @@ def job_list(request):
 
 
 
-# MATCHING – JSON API
+# DOPASOWANIE – JSON API
 @require_GET
 def match_jobs(request, cv_id):
     """
-    API endpoint returning ranked jobs with scores.
+    Punkt końcowy API zwracający rankingowane oferty z wynikami.
     """
 
     try:
@@ -127,7 +127,7 @@ def match_jobs(request, cv_id):
     })
 
 
-# MATCHING – HTML VIEW
+# DOPASOWANIE – WIDOK HTML
 def match_jobs_view(request, cv_id):
     cv = get_object_or_404(CV, id=cv_id)
     top = int(request.GET.get("top", 5))
@@ -149,7 +149,7 @@ def match_jobs_view(request, cv_id):
 
 def filter(request, cv_id):
     """
-    View showing jobs that match a given CV.
+    Widok pokazujący oferty pracy pasujące do danego CV.
     """
 
     cv = get_object_or_404(CV, id=cv_id)

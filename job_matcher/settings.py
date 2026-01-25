@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # My Apps
+    # Moje aplikacje
     'jobfinder.apps.JobfinderConfig',
     'users.apps.UsersConfig',  
     'django_crontab',

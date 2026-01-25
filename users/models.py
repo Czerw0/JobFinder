@@ -15,18 +15,18 @@ class Profile(models.Model):
 class CV(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
 
-    # Contact
+    # Kontakt
     full_name = models.CharField(max_length=255)
     email = models.EmailField()
     phone_number = models.CharField(max_length=20, blank=True)
     github_profile = models.URLField(blank=True)
     linkedin_profile = models.URLField(blank=True)
 
-    # Matching-critical fields
-    skills = models.TextField(blank=True, default="", help_text="Comma-separated skills.")
-    technologies = models.TextField(blank=True, default="", help_text="Comma-separated technologies.")
-    preferred_roles = models.TextField(blank=True, default="", help_text="Comma-separated preferred roles.")
-    preferred_locations = models.TextField(blank=True, default="", help_text="Comma-separated locations.")
+    # Krytyczne pola dla dopasowywania
+    skills = models.TextField(blank=True, default="", help_text="Skills (comma separated).")
+    technologies = models.TextField(blank=True, default="", help_text="Technologies (comma separated).")
+    preferred_roles = models.TextField(blank=True, default="", help_text="Preferable job roles (comma separated)")
+    preferred_locations = models.TextField(blank=True, default="", help_text="Preferable locations (comma separated)")
     job_seniority = models.CharField(
         max_length=20,
         choices=[('junior','Junior'),('mid','Mid'),('senior','Senior')],
@@ -39,7 +39,7 @@ class CV(models.Model):
     )
     industry_preference = models.CharField(max_length=100, blank=True, default='')
 
-    # Experience
+    # Doświadczenie
     experience_years = models.IntegerField(null=True)
     experience = models.TextField(blank=True)
     education = models.TextField(blank=True)

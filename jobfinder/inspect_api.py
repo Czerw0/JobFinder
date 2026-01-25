@@ -1,6 +1,6 @@
 '''
-Quick script to check the structure of the RemoteOK API response.
-It fetches the API data and prints a readable, formatted JSON so you can inspect keys and content.
+Szybki skrypt do sprawdzenia struktury odpowiedzi API RemoteOK.
+Pobiera dane API i drukuje czytelny, sformatowany JSON, abyś mógł sprawdzić klucze i zawartość.
 '''
 
 import requests
@@ -8,7 +8,7 @@ import json
 import sys
 
 
-# RemoteOK API endpoint
+# Punkt końcowy API RemoteOK
 API_URL = "https://remoteok.com/api"
 
 
@@ -18,34 +18,34 @@ HEADERS = {
 
 def inspect_remoteok_api():
     """
-    Call the RemoteOK API, validate the response, and print a human-friendly analysis
-    plus the full pretty-printed JSON.
+    Wywołaj API RemoteOK, zweryfikuj odpowiedź i wydrukuj przyjazną dla człowieka analizę
+    plus pełny ładnie sformatowany JSON.
     """
-    print(f"Contacting API endpoint: {API_URL}")
+    print(f"Łączenie z punktem końcowym API: {API_URL}")
 
     try:
-        # Perform a GET request with a timeout so it doesn't hang forever.
+        # Wykonaj żądanie GET z timeoutem, aby nie wisiało w nieskończoność.
         response = requests.get(API_URL, headers=HEADERS, timeout=20)
 
-        # If the server responded with an error status, raise an exception.
+        # Jeśli serwer odpowiedział błędnym statusem, wywołaj wyjątek.
         response.raise_for_status()
 
     except requests.exceptions.HTTPError as e:
-        print(f"\nHTTP Error: The server returned a status code {e.response.status_code}")
-        print(f"   Reason: {e.response.reason}")
-        print(f"   Response Text: {e.response.text}")
-        sys.exit(1)  # Exit with a non-zero code to indicate failure
+        print(f"\nBłąd HTTP: Serwer zwrócił kod statusu {e.response.status_code}")
+        print(f"   Powód: {e.response.reason}")
+        print(f"   Tekst odpowiedzi: {e.response.text}")
+        sys.exit(1)  # Wyjdź z kodem niezerowym, aby wskazać błąd
     except requests.exceptions.RequestException as e:
-        # Catches network-related problems like timeouts or DNS failures.
-        print(f"\nNetwork Error: Could not connect to the API.")
-        print(f"   Error Details: {e}")
+        # Łapie problemy związane z siecią, takie jak timeouty lub błędy DNS.
+        print(f"\nBłąd sieci: Nie można połączyć się z API.")
+        print(f"   Szczegóły błędu: {e}")
         sys.exit(1)
 
-    print(f"Success! Received a response (Status Code: {response.status_code}).")
-    print("Parsing JSON data...")
+    print(f"Sukces! Otrzymano odpowiedź (Kod statusu: {response.status_code}).")
+    print("Parsowanie danych JSON...")
 
     try:
-        # Parse response body as JSON.
+        # Parsuj ciało odpowiedzi jako JSON.
         data = response.json()
     except json.JSONDecodeError:
         print("\nJSON Error: The response from the API was not valid JSON.")
@@ -53,26 +53,26 @@ def inspect_remoteok_api():
         print(response.text[:500])
         sys.exit(1)
 
-    # Response parsed successfully — provide some quick analysis.
-    print("\nAPI Response Analysis")
+    # Odpowiedź sparsowana pomyślnie — podaj szybką analizę.
+    print("\nAnaliza odpowiedzi API")
     if isinstance(data, list):
-        print(f"The root of the JSON is a LIST containing {len(data)} items.")
+        print(f"Główny element JSON to LISTA zawierająca {len(data)} elementów.")
         if data:
-            # On RemoteOK, the first element is usually a notice; the second is the first job.
+            # W RemoteOK pierwszy element to zwykle powiadomienie; drugi to pierwsza oferta pracy.
             item_to_inspect = data[1] if len(data) > 1 else data[0]
-            print("\nKeys found in the second item (a sample job offer):")
+            print("\nKlucze znalezione w drugim elemencie (przykładowa oferta pracy):")
             for key in item_to_inspect.keys():
                 print(f"  - {key}")
     elif isinstance(data, dict):
-        print(f"The root of the JSON is a DICTIONARY (object) with {len(data)} keys.")
-        print("\nKeys found in the dictionary:")
+        print(f"Główny element JSON to SŁOWNIK (obiekt) z {len(data)} kluczami.")
+        print("\nKlucze znalezione w słowniku:")
         for key in data.keys():
             print(f"  - {key}")
     else:
-        print("The JSON is a single value (e.g., string, number).")
+        print("JSON to pojedyncza wartość (np. string, liczba).")
 
-    # Inspecting the content
-    print("\nFull JSON Response (Formatted)")
+    # Sprawdzanie zawartości
+    print("\nPełna odpowiedź JSON (Sformatowana)")
     pretty_json = json.dumps(data, indent=2)
     print(pretty_json)
 

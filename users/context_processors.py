@@ -1,7 +1,7 @@
 from users.models import CV
 
 def user_cv(request):
-    # Context processor to add the user's CV to the template context
+    # Dodaje CV użytkownika do kontekstu szablonu, jeśli jest zalogowany
     if request.user.is_authenticated:
         try:
             return {"user_cv": CV.objects.get(user=request.user)}

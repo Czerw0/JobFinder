@@ -1,17 +1,17 @@
-# Configure logging for the JobFinder application
-import logging # standard logging module
-from logging.handlers import RotatingFileHandler # for log file rotation
+# Konfiguruj logowanie dla aplikacji JobFinder
+import logging # standardowy moduł logowania
+from logging.handlers import RotatingFileHandler # do rotacji plików logów
 import os
 
-# Get the base directory and create a logs folder
+# Pobierz katalog bazowy i utwórz folder logs
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOG_DIR = os.path.join(BASE_DIR, "logs")
 os.makedirs(LOG_DIR, exist_ok=True)
 
 def setup_logger(name, log_file, level=logging.INFO, max_bytes=5_000_000, backup_count=3):
     """
-    Create and configure a logger with both file and console output.
-    Files are rotated when they reach max_bytes, keeping up to backup_count files.
+    Utwórz i skonfiguruj logger z wyjściem do pliku i konsoli.
+    Pliki są rotowane po osiągnięciu max_bytes, zachowując do backup_count plików.
     """
     logger = logging.getLogger(name)
     logger.setLevel(level)
@@ -30,7 +30,7 @@ def setup_logger(name, log_file, level=logging.INFO, max_bytes=5_000_000, backup
     file_handler.setFormatter(file_formatter)
     logger.addHandler(file_handler)
 
-    # Set up console handler for terminal output
+    # Skonfiguruj handler konsoli dla wyjścia terminala
     console_handler = logging.StreamHandler()
     console_formatter = logging.Formatter("%(levelname)s %(name)s: %(message)s")
     console_handler.setFormatter(console_formatter)
