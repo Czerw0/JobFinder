@@ -68,8 +68,17 @@ class Command(BaseCommand):
                     posted_date = None
 
                 # Remove any HTML from the job description but keep line breaks where appropriate.
+                import ftfy
+
+                # Pobierasz surowy opis
+                raw_description = offer.get("description", "")
+
+                # 1. Naprawiasz błędy kodowania (np. zamiana u00c2\u00ae na ®)
+                clean_description = ftfy.fix_text(raw_description)
+
+                # 2. Parsujesz naprawiony tekst przez BeautifulSoup
                 description = BeautifulSoup(
-                    offer.get("description", ""), "html.parser"
+                    clean_description, "html.parser"
                 ).get_text(separator="\n").strip()
 
                 # Ensure tags are represented as a list so we can store them consistently.
